@@ -20,6 +20,7 @@ OBJS=$(OBJDIR)/Machine.o \
      $(OBJDIR)/Mutex.o \
      $(OBJDIR)/MPCB.o \
      $(OBJDIR)/MemBlock.o \
+     $(OBJDIR)/FATData.o \
      $(OBJDIR)/main.o
      
      

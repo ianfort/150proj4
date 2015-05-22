@@ -27,10 +27,12 @@ vector<MPCB*> *pools;
 uint8_t *VMPoolStart;
 void* sharebase;
 TVMMemoryPoolID shareid, heapid;
+FATData* VMFAT;
 
 const TVMMemoryPoolID VM_MEMORY_POOL_ID_SYSTEM = 0;
 
-TVMStatus VMStart(int tickms, TVMMemorySize heapsize, int machinetickms, TVMMemorySize sharedsize, int argc, char *argv[])
+TVMStatus VMStart(int tickms, TVMMemorySize heapsize, int machinetickms, TVMMemorySize sharedsize, const char *mount,
+int argc, char *argv[])
 {
   TVMThreadID idletid;
   TVMMemorySize share = (sharedsize+0xFFF)&(~0xFFF);
@@ -52,6 +54,8 @@ TVMStatus VMStart(int tickms, TVMMemorySize heapsize, int machinetickms, TVMMemo
   heap = new uint8_t[heapsize];
   pools = new vector<MPCB*>;
   VMMemoryPoolCreate(heap, heapsize, &heapid);
+
+  VMFAT = new FATData(mount);
 
   mainThread = new Thread;
   mainThread->setPriority(VM_THREAD_PRIORITY_NORMAL);
@@ -80,7 +84,14 @@ TVMStatus VMStart(int tickms, TVMMemorySize heapsize, int machinetickms, TVMMemo
   }//for all threads
   delete threads;
   delete mutexes;
+
+  for (vector<MPCB*>::iterator itr = pools->begin() ; itr != pools->end() ; itr++)
+  {
+    delete *itr;
+  }
+  delete pools;
   delete heap;
+
   return VM_STATUS_SUCCESS;
 } //VMStart
 
@@ -776,6 +787,8 @@ MPCB* findMemPool(TVMMemoryPoolID id)
   }
   return NULL;
 }//MPCB* findMemPool(TVMMemoryPoolID id)
+
+
 //***************************************************************************//
 // END UTILITY FUNCTIONS                                                     //
 //***************************************************************************//

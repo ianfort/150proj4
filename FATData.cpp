@@ -45,6 +45,12 @@ unsigned int FATData::getBytesPerSector()
   return bytesPerSector;
 }//unsigned int FATData::getBytesPerSector()
 
+
+void FATData::fatls()
+{
+  cout << "   DATE   |  TIME  | TYPE |    SIZE   |    SFN      |  LFN\n";
+}//void FATData::fatls()
+
 //***************************************************************************//
 // Begin Utility Functions for FATData                                       //
 //***************************************************************************//

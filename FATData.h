@@ -18,6 +18,23 @@
 #define BPB_TOT_SEC_32_SIZE 4
 #define BPB_NUM_FATS 2
 #define ROOT_ENT_SZ 32
+#define DIRENT_NAME_OFFSET 0
+#define DIRENT_NAME_SZ 11
+#define DIRENT_DATE_OFFSET 16
+#define DIRENT_DATE_SZ 2
+#define DIRENT_TIME_OFFSET 14
+#define DIRENT_TIME_SZ 2
+#define DIRENT_TIME_CS_OFFSET 13
+#define DIRENT_TIME_CS_SZ 1
+#define DIRENT_ATTR_OFFSET 11
+#define DIRENT_ATTR_SZ 1
+#define ATTR_READ_ONLY 0x01
+#define ATTR_HIDDEN 0x02
+#define ATTR_SYSTEM 0x04
+#define ATTR_VOLUME_ID 0x08
+#define ATTR_DIRECTORY 0x10
+#define ATTR_ARCHIVE 0x20
+#define ATTR_LONG_NAME (0x01 | 0x02 | 0x04 | 0x08 | 0x10 | 0x20)
 
 #include <stdint.h>
 
@@ -36,6 +53,7 @@ public:
   FATData(const char* mount);
   ~FATData();
   unsigned int getBytesPerSector();
+  void fatls();
 };
 
 unsigned int bytesToUnsigned(uint8_t* start, unsigned int size);

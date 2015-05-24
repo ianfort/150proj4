@@ -24,7 +24,7 @@ FATData::FATData(const char* mount)
   totalSectors32 = bytesToUnsigned(&BPB[BPB_TOT_SEC_32_OFFSET],BPB_TOT_SEC_32_SIZE);
 
   FATSz = BPB_NUM_FATS * FATSz16;
-  ROOTSz = rootEntityCount * ROOT_ENT_SZ;
+  ROOTSz = rootEntityCount * ROOT_ENT_SZ / 512; //Dividing by 512 is black magic from a handout
   FAT = new uint8_t[FATSz];
   ROOT = new uint8_t[ROOTSz];
   imageFile.read((char*)FAT, FATSz);

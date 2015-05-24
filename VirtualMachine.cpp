@@ -2,6 +2,7 @@
 #include "Tibia.h"
 #include "Mutex.h"
 #include "MPCB.h"
+#include "FATData.h"
 #include <algorithm>
 
 
@@ -484,7 +485,7 @@ TVMStatus VMThreadCreate(TVMThreadEntry entry, void *param, TVMMemorySize memsiz
   MachineSuspendSignals(&sigs);
   SMachineContext context;
   TVMStatus test;
-  uint8_t *mem
+  uint8_t *mem;
   if (!entry || !tid)
   {
     MachineResumeSignals(&sigs);
@@ -495,8 +496,8 @@ TVMStatus VMThreadCreate(TVMThreadEntry entry, void *param, TVMMemorySize memsiz
     MachineResumeSignals(&sigs);
     test = VMMemoryPoolAllocate(VM_MEMORY_POOL_ID_SYSTEM, memsize, (void**)&mem);
     MachineSuspendSignals(&sigs);
-    scheduler();//try to allocate until it works
-  }
+    scheduler();
+  }//try to allocate until it works
   Thread* t = new Thread(prio, VM_THREAD_STATE_DEAD, tid, mem, memsize, entry, param);
   threads->push_back(t);
   Tibia *tibia = new Tibia(entry, param);

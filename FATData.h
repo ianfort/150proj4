@@ -17,6 +17,7 @@
 #define BPB_TOT_SEC_32_OFFSET 32
 #define BPB_TOT_SEC_32_SIZE 4
 
+#include <stdint.h>
 
 class FATData
 {
@@ -27,13 +28,13 @@ class FATData
   unsigned int totalSectors16;
   unsigned int FATSz16;
   unsigned int totalSectors32;
-
 public:
   FATData(const char* mount);
   ~FATData();
-
   unsigned int getBytesPerSector();
-  unsigned int bytesToUnsigned(uint8_t* start, size);
 };
+
+unsigned int bytesToUnsigned(uint8_t* start, unsigned int size);
+
 
 #endif

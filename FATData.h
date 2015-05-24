@@ -37,6 +37,8 @@
 #define ATTR_LONG_NAME (0x01 | 0x02 | 0x04 | 0x08 | 0x10 | 0x20)
 
 #include <stdint.h>
+#include "VirtualMachine.h"
+#include <cstring>
 
 class FATData
 {
@@ -47,6 +49,7 @@ class FATData
   unsigned int totalSectors16;
   unsigned int FATSz16;
   unsigned int totalSectors32;
+  uint8_t* BPB2;
   uint8_t* FAT;
   uint8_t* ROOT;
 public:
@@ -54,6 +57,9 @@ public:
   ~FATData();
   unsigned int getBytesPerSector();
   void fatls();
+  void fatvol();
+  void fillDateTime(SVMDateTimeRef dt, uint8_t* loc);
+  void fillDirEnt(SVMDirectoryEntryRef dir, uint8_t* loc);
 };
 
 unsigned int bytesToUnsigned(uint8_t* start, unsigned int size);

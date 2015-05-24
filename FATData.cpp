@@ -10,10 +10,12 @@ using namespace std;
 FATData::FATData(const char* mount)
 {
   uint8_t* BPB = new uint8_t[BPB_SIZE];
+  BPB2 = new uint8_t[BPB_SIZE];
   unsigned int FATSz;
   unsigned int ROOTSz;
   ifstream imageFile(mount, ios::in | ios::binary);
   imageFile.read((char*)BPB, BPB_SIZE);
+  memcpy(BPB2, BPB, BPB_SIZE);
 
   bytesPerSector = bytesToUnsigned(&BPB[BPB_BYTES_PER_SEC_OFFSET], BPB_BYTES_PER_SEC_SIZE);
   sectorsPerCluster = bytesToUnsigned(&BPB[BPB_SEC_PER_CLUS_OFFSET], BPB_SEC_PER_CLUS_SIZE);
@@ -37,6 +39,9 @@ FATData::FATData(const char* mount)
 
 FATData::~FATData()
 {
+  delete BPB2;
+  delete FAT;
+  delete ROOT;
 }//FATData destructor
 
 
@@ -50,6 +55,57 @@ void FATData::fatls()
 {
   cout << "   DATE   |  TIME  | TYPE |    SIZE   |    SFN      |  LFN\n";
 }//void FATData::fatls()
+
+
+void FATData::fatvol()
+{
+  cout << "OEM Name           : " << 0 << endl;
+  cout << "Bytes Per Sector   : " << 0 << endl;
+  cout << "Sectors Per Cluster: " << 0 << endl;
+  cout << "Reserved Sectors   : " << 0 << endl;
+  cout << "FAT Count          : " << 0 << endl;
+  cout << "Root Entry         : " << 0 << endl;
+  cout << "Sector Count 16    : " << 0 << endl;
+  cout << "Media              : " << 0 << endl;
+  cout << "FAT Size 16        : " << 0 << endl;
+  cout << "Sectors Per Track  : " << 0 << endl;
+  cout << "Head Count         : " << 0 << endl;
+  cout << "Hidden Sector Count: " << 0 << endl;
+  cout << "Sector Count 32    : " << 0 << endl;
+  cout << "Drive Number       : " << 0 << endl;
+  cout << "Boot Signature     : " << 0 << endl;
+  cout << "Volume ID          : " << 0 << endl;
+  cout << "Volume Label       : " << 0 << endl;
+  cout << "File System Type   : " << 0 << endl;
+  cout << "Root Dir Sectors   : " << 0 << endl;
+  cout << "First Root Sector  : " << 0 << endl;
+  cout << "First Data Sector  : " << 0 << endl;
+  cout << "Cluster Count      : " << 0 << endl;
+}//void FATData::fatvol()
+
+
+void FATData::fillDateTime(SVMDateTimeRef dt, uint8_t* loc)
+{
+  dt->DYear;
+  dt->DMonth;
+  dt->DDay;
+  dt->DHour;
+  dt->DMinute;
+  dt->DSecond;
+  dt->DHundredth;
+}//void FATData::fillDateTime(SVMDateTimeRef dt, uint8_t* loc)
+
+
+void FATData::fillDirEnt(SVMDirectoryEntryRef dir, uint8_t* loc)
+{
+  dir->DLongFileName;
+  dir->DShortFileName;
+  dir->DSize;
+  dir->DAttributes;
+  dir->DCreate;
+  dir->DAccess;
+  dir->DModify;
+}//void FATData::fillDirEnt(SVMDirectoryEntryRef dir, uint8_t* loc)
 
 //***************************************************************************//
 // Begin Utility Functions for FATData                                       //

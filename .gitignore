@@ -26,6 +26,7 @@
 *.exe
 *.out
 *.app
+vm
 
 # Temp Files and core
 *~

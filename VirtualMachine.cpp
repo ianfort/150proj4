@@ -483,12 +483,20 @@ TVMStatus VMThreadCreate(TVMThreadEntry entry, void *param, TVMMemorySize memsiz
 {
   MachineSuspendSignals(&sigs);
   SMachineContext context;
+  TVMStatus test;
+  uint8_t *mem
   if (!entry || !tid)
   {
     MachineResumeSignals(&sigs);
     return VM_STATUS_ERROR_INVALID_PARAMETER;
   }//INVALID PARAMS, must not be NULL
-  uint8_t *mem =  new uint8_t[memsize];
+  while (test != VM_STATUS_SUCCESS)
+  {
+    MachineResumeSignals(&sigs);
+    test = VMMemoryPoolAllocate(VM_MEMORY_POOL_ID_SYSTEM, memsize, (void**)&mem);
+    MachineSuspendSignals(&sigs);
+    scheduler();//try to allocate until it works
+  }
   Thread* t = new Thread(prio, VM_THREAD_STATE_DEAD, tid, mem, memsize, entry, param);
   threads->push_back(t);
   Tibia *tibia = new Tibia(entry, param);

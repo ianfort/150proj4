@@ -84,16 +84,17 @@ void FATData::fatvol()
 }//void FATData::fatvol()
 
 
-void FATData::fillDateTime(SVMDateTimeRef dt, uint8_t* loc)
+void FATData::fillDateTime(SVMDateTimeRef dt, time_t t, unsigned char dh = 0)
 {
-  dt->DYear;
-  dt->DMonth;
-  dt->DDay;
-  dt->DHour;
-  dt->DMinute;
-  dt->DSecond;
-  dt->DHundredth;
-}//void FATData::fillDateTime(SVMDateTimeRef dt, uint8_t* loc)
+  struct tm LocalTime = *localtime(&t);
+  dt->DYear = LocalTime.tm_year + 1900;
+  dt->DMonth = LocalTime.tm_mon + 1;
+  dt->DDay = LocalTime.tm_mday;
+  dt->DHour = LocalTime.tm_hour;
+  dt->DMinute = LocalTime.tm_min;
+  dt->DSecond = LocalTime.tm_sec;
+  dt->DHundredth = dh;
+}//void FATData::fillDateTime(SVMDateTimeRef dt, time_t t, unsigned char dh = 0)
 
 
 void FATData::fillDirEnt(SVMDirectoryEntryRef dir, uint8_t* loc)

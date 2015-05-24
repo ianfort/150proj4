@@ -39,6 +39,7 @@
 #include <stdint.h>
 #include "VirtualMachine.h"
 #include <cstring>
+#include <ctime>
 
 class FATData
 {
@@ -58,11 +59,11 @@ public:
   unsigned int getBytesPerSector();
   void fatls();
   void fatvol();
-  void fillDateTime(SVMDateTimeRef dt, uint8_t* loc);
   void fillDirEnt(SVMDirectoryEntryRef dir, uint8_t* loc);
 };
 
 unsigned int bytesToUnsigned(uint8_t* start, unsigned int size);
+void fillDateTime(SVMDateTimeRef dt, time_t t, unsigned char dh);
 
 
 #endif

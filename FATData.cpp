@@ -3,43 +3,42 @@
 #include <iostream>
 #include <sys/stat.h>
 
+/*
+#define BPB_SIZE 36
+#define BPB_BYTES_PER_SEC_OFFSET 11
+#define BPB_BYTES_PER_SEC_SIZE 2
+#define BPB_SEC_PER_CLUS_OFFSET 13
+#define BPB_SEC_PER_CLUS_SIZE 1
+#define BPB_RSVD_SEC_CNT_OFFSET 14
+#define BPB_RSVD_SEC_CNT_SIZE 2
+#define BPB_ROOT_ENT_CNT_OFFSET 17
+#define BPB_ROOT_ENT_CNT_SIZE 2
+#define BPB_TOT_SEC_16_OFFSET 19
+#define BPB_TOT_SEC_16_SIZE 2
+#define BPB_FATS_Z16_OFFSET 22
+#define BPB_FATS_Z16_SIZE 2
+#define BPB_TOT_SEC_32_OFFSET 32
+#define BPB_TOT_SEC_32_SIZE 4
+*/ 
+
 using namespace std;
 
-/*
-  const unsigned int BPBSize;
-
-  const unsigned int bytesPerSecOffset;
-  const unsigned int bytesPerSecSize;
-
-  const unsigned int secPerClusOffset;
-  const unsigned int secPerClusSize;
-
-  const unsigned int rsvdSecCntOffset;
-  const unsigned int rsvdSecCntSize;
-
-  const unsigned int rootEntCntOffset;
-  const unsigned int rootEntCntSize;
-
-  const unsigned int totSec16Offset;
-  const unsigned int totSec16Size;
-
-  const unsigned int FATSz16Offset;
-  const unsigned int FATSz16Size;
-
-  const unsigned int totSec32Offset;
-  const unsigned int totSec32Size;
-*/
-
-FATData::FATData(const char* mount) : BPBSize(36) ,
-bytesPerSecOffset(11) , bytesPerSecSize(2) , secPerClusOffset(13) , secPerClusSize(1) ,
-rsvdSecCntOffset(14) , rsvdSecCntSize(2) , rootEntCntOffset(17) , rootEntCntSize(2) ,
-totSec16Offset(19) , totSec16Size(2) , FATSz16Offset(22) , FATSz16Size(2) ,
-totSec32Offset(32) , totSec32Size(4)
+FATData::FATData(const char* mount)
 {
-  BPB = new uint8_t[BPBSize];
+  uint8_t* BPB = new uint8_t[BPBSize];
   ifstream imageFileIn(mount, ios::in | ios::binary);
   imageFile.read(BPB, BPBSize);
   imageFile.close();
+
+  bytesPerSector = bytesToUnsigned(&BPB[BPB_BYTES_PER_SEC_OFFSET], BPB_BYTES_PER_SEC_SIZE);
+  sectorsPerCluster = bytesToUnsigned(&BPB[BPB_SEC_PER_CLUS_OFFSET], BPB_SEC_PER_CLUS_SIZE);
+  reservedSectorCount = bytesToUnsigned(&BPB[BPB_RSVD_SEC_CNT_OFFSET], BPB_RSVD_SEC_CNT_SIZE);
+  rootEntityCount = bytesToUnsigned(&BPB[BPB_ROOT_ENT_CNT_OFFSET], BPB_ROOT_ENT_CNT_SIZE);
+  totalSectors16 = bytesToUnsigned(&BPB[BPB_TOT_SEC_16_OFFSET],BPB_TOT_SEC_16_SIZE);
+  FATSz16 = bytesToUnsigned(&BPB[BPB_FATS_Z16_OFFSET], BPB_FATS_Z16_SIZE);
+  totalSectors32 = bytesToUnsigned(&BPB[BPB_TOT_SEC_32_OFFSET],BPB_TOT_SEC_32_SIZE);
+
+  delete BPB;
 }
 
 

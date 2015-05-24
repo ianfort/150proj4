@@ -1,32 +1,33 @@
 #ifndef FATDATA_H
 #define FATDATA_H
 
+#define BPB_SIZE 36
+#define BPB_BYTES_PER_SEC_OFFSET 11
+#define BPB_BYTES_PER_SEC_SIZE 2
+#define BPB_SEC_PER_CLUS_OFFSET 13
+#define BPB_SEC_PER_CLUS_SIZE 1
+#define BPB_RSVD_SEC_CNT_OFFSET 14
+#define BPB_RSVD_SEC_CNT_SIZE 2
+#define BPB_ROOT_ENT_CNT_OFFSET 17
+#define BPB_ROOT_ENT_CNT_SIZE 2
+#define BPB_TOT_SEC_16_OFFSET 19
+#define BPB_TOT_SEC_16_SIZE 2
+#define BPB_FATS_Z16_OFFSET 22
+#define BPB_FATS_Z16_SIZE 2
+#define BPB_TOT_SEC_32_OFFSET 32
+#define BPB_TOT_SEC_32_SIZE 4
+
+
 class FATData
 {
-  const unsigned int BPBSize;
+  unsigned int bytesPerSector;
+  unsigned int sectorsPerCluster;
+  unsigned int reservedSectorCount;
+  unsigned int rootEntityCount;
+  unsigned int totalSectors16;
+  unsigned int FATSz16;
+  unsigned int totalSectors32;
 
-  const unsigned int bytesPerSecOffset;
-  const unsigned int bytesPerSecSize;
-
-  const unsigned int secPerClusOffset;
-  const unsigned int secPerClusSize;
-
-  const unsigned int rsvdSecCntOffset;
-  const unsigned int rsvdSecCntSize;
-
-  const unsigned int rootEntCntOffset;
-  const unsigned int rootEntCntSize;
-
-  const unsigned int totSec16Offset;
-  const unsigned int totSec16Size;
-
-  const unsigned int FATSz16Offset;
-  const unsigned int FATSz16Size;
-
-  const unsigned int totSec32Offset;
-  const unsigned int totSec32Size;
-
-  uint8_t* BPB;
 public:
   FATData(const char* mount);
   ~FATData();

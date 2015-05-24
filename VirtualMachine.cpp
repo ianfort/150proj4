@@ -230,7 +230,7 @@ TVMStatus VMFileRead(int filedescriptor, void *data, int *length)
     tr->setState(VM_THREAD_STATE_WAITING);
     scheduler();
     bytesread += tr->getcd();
-    memcpy(retval, readloc, min(lenleft, 512));
+    memcpy(&retval[i*512], readloc, min(lenleft, 512));
   }
   tr->setcd(bytesread);
   *length = tr->getcd();

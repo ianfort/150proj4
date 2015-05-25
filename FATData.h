@@ -1,7 +1,7 @@
 #ifndef FATDATA_H
 #define FATDATA_H
 
-#define BPB_SIZE 36
+#define BPB_SIZE 62
 #define BPB_BYTES_PER_SEC_OFFSET 11
 #define BPB_BYTES_PER_SEC_SIZE 2
 #define BPB_SEC_PER_CLUS_OFFSET 13
@@ -45,7 +45,7 @@ class FATData
   unsigned int bytesPerSector;
   unsigned int sectorsPerCluster;
   unsigned int reservedSectorCount;
-  unsigned int rootEntityCount;
+  unsigned int rootEntryCount;
   unsigned int totalSectors16;
   unsigned int FATSz16;
   unsigned int totalSectors32;

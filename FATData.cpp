@@ -83,31 +83,6 @@ void FATData::fatvol()
   cout << "Cluster Count      : " << 0 << endl;
 }//void FATData::fatvol()
 
-
-void FATData::fillDateTime(SVMDateTimeRef dt, time_t t, unsigned char dh = 0)
-{
-  struct tm LocalTime = *localtime(&t);
-  dt->DYear = LocalTime.tm_year + 1900;
-  dt->DMonth = LocalTime.tm_mon + 1;
-  dt->DDay = LocalTime.tm_mday;
-  dt->DHour = LocalTime.tm_hour;
-  dt->DMinute = LocalTime.tm_min;
-  dt->DSecond = LocalTime.tm_sec;
-  dt->DHundredth = dh;
-}//void FATData::fillDateTime(SVMDateTimeRef dt, time_t t, unsigned char dh = 0)
-
-
-void FATData::fillDirEnt(SVMDirectoryEntryRef dir, uint8_t* loc)
-{
-  dir->DLongFileName;
-  dir->DShortFileName;
-  dir->DSize;
-  dir->DAttributes;
-  dir->DCreate;
-  dir->DAccess;
-  dir->DModify;
-}//void FATData::fillDirEnt(SVMDirectoryEntryRef dir, uint8_t* loc)
-
 //***************************************************************************//
 // Begin Utility Functions for FATData                                       //
 //***************************************************************************//
@@ -120,5 +95,46 @@ unsigned int bytesToUnsigned(uint8_t* start, unsigned int size)
   }
   return accum;
 }//unsigned int bytesToUnsigned(uint8_t* start, size)
+
+
+void fillDate(SVMDateTimeRef dt, uint8_t date[2])
+{
+  dt->DYear = 1980 + ((date[HI] << 1) & 127); //0000 0000 0111 1111
+  dt->DMonth = 1 + ((date[LO] << 5) & 7) + (date[HI] & 1); //0000 0111 1000 0000
+  dt->DDay = 1 + (date[LO] & 31); //1111 1000 0000 0000
+}//void fillDate(SVMDateTimeRef dt, uint8_t date[2])
+
+
+void fillDirEnt(SVMDirectoryEntryRef dir, uint8_t* loc)
+{
+  uint8_t empty[2] = {0, 0};
+//  dir->DLongFileName; //TODO
+  //13 chars: 8 chars of filename, 1 for '.', 3 for file extension, 1 for '\0' terminating char
+  memcpy(dir->DShortFileName, loc+DIRENT_NAME_OFFSET, 8);
+  dir->DShortFileName[8] = '.';
+  memcpy((dir->DShortFileName)+9, loc+DIRENT_NAME_OFFSET+8, 3);
+  dir->DSize = *(loc + DIRENT_FILESIZE_OFFSET);
+  dir->DAttributes = *(loc + DIRENT_ATTR_OFFSET);
+  fillDate(&(dir->DCreate), (loc+DIRENT_CRT_DATE_OFFSET));
+  fillTime(&(dir->DCreate), (loc+DIRENT_CRT_TIME_OFFSET), *(loc+DIRENT_CRT_TIME_CS_OFFSET));
+  fillDate(&(dir->DAccess), (loc+DIRENT_ACC_DATE_OFFSET));
+  fillTime(&(dir->DAccess), empty);
+  fillDate(&(dir->DModify), (loc+DIRENT_WRT_DATE_OFFSET));
+  fillTime(&(dir->DModify), (loc+DIRENT_WRT_TIME_OFFSET));
+}//void fillDirEnt(SVMDirectoryEntryRef dir, uint8_t* loc)
+
+
+void fillTime(SVMDateTimeRef dt, uint8_t time[2], unsigned char dh)
+{
+  dt->DHour = ((time[HI] << 3) & 31); //0000 0000 0001 1111
+  dt->DMinute = ((time[LO] << 5) & 7) + (time[HI] & 7); //0000 0111 1110 0000
+  dt->DSecond = 2 * (time[LO] & 31); //1111 1000 0000 0000, 2-sec count
+  dt->DHundredth = dh;
+  if (dh >= 100)
+  {
+    dt->DSecond += 1;
+    dt->DHundredth -= 100;
+  }//if there's between one and two hundredths of an extra second, it's a full extra second
+}//void fillTime(SVMDateTimeRef dt, uint8_t time[2], unsigned char dh)
 
 

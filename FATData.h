@@ -20,12 +20,22 @@
 #define ROOT_ENT_SZ 32
 #define DIRENT_NAME_OFFSET 0
 #define DIRENT_NAME_SZ 11
-#define DIRENT_DATE_OFFSET 16
-#define DIRENT_DATE_SZ 2
-#define DIRENT_TIME_OFFSET 14
-#define DIRENT_TIME_SZ 2
-#define DIRENT_TIME_CS_OFFSET 13
-#define DIRENT_TIME_CS_SZ 1
+#define DIRENT_CRT_DATE_OFFSET 16
+#define DIRENT_CRT_DATE_SZ 2
+#define DIRENT_CRT_TIME_OFFSET 14
+#define DIRENT_CRT_TIME_SZ 2
+#define DIRENT_CRT_TIME_CS_OFFSET 13
+#define DIRENT_CRT_TIME_CS_SZ 1
+#define DIRENT_ACC_DATE_OFFSET 18
+#define DIRENT_ACC_DATE_SZ 2
+#define DIRENT_WRT_DATE_OFFSET 24
+#define DIRENT_WRT_DATE_SZ 2
+#define DIRENT_WRT_TIME_OFFSET 22
+#define DIRENT_WRT_TIME_SZ 2
+#define DIRENT_ATTR_OFFSET 11
+#define DIRENT_ATTR_SZ 1
+#define DIRENT_FILESIZE_OFFSET 28
+#define DIRENT_FILESIZE_SZ 4
 #define DIRENT_ATTR_OFFSET 11
 #define DIRENT_ATTR_SZ 1
 #define ATTR_READ_ONLY 0x01
@@ -35,11 +45,12 @@
 #define ATTR_DIRECTORY 0x10
 #define ATTR_ARCHIVE 0x20
 #define ATTR_LONG_NAME (0x01 | 0x02 | 0x04 | 0x08 | 0x10 | 0x20)
+#define LO 0
+#define HI 1
 
 #include <stdint.h>
 #include "VirtualMachine.h"
 #include <cstring>
-#include <ctime>
 
 class FATData
 {
@@ -59,11 +70,12 @@ public:
   unsigned int getBytesPerSector();
   void fatls();
   void fatvol();
-  void fillDirEnt(SVMDirectoryEntryRef dir, uint8_t* loc);
 };
 
 unsigned int bytesToUnsigned(uint8_t* start, unsigned int size);
-void fillDateTime(SVMDateTimeRef dt, time_t t, unsigned char dh);
+void fillDate(SVMDateTimeRef dt, uint8_t date[2]);
+void fillDirEnt(SVMDirectoryEntryRef dir, uint8_t* loc);
+void fillTime(SVMDateTimeRef dt, uint8_t time[2], unsigned char dh = 0);
 
 
 #endif

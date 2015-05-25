@@ -17,16 +17,16 @@ FATData::FATData(const char* mount)
   imageFile.read((char*)BPB, BPB_SIZE);
   memcpy(BPB2, BPB, BPB_SIZE);
 
-  bytesPerSector = bytesToUnsigned(&BPB[BPB_BYTES_PER_SEC_OFFSET], BPB_BYTES_PER_SEC_SIZE);
-  sectorsPerCluster = bytesToUnsigned(&BPB[BPB_SEC_PER_CLUS_OFFSET], BPB_SEC_PER_CLUS_SIZE);
-  reservedSectorCount = bytesToUnsigned(&BPB[BPB_RSVD_SEC_CNT_OFFSET], BPB_RSVD_SEC_CNT_SIZE);
-  rootEntityCount = bytesToUnsigned(&BPB[BPB_ROOT_ENT_CNT_OFFSET], BPB_ROOT_ENT_CNT_SIZE);
-  totalSectors16 = bytesToUnsigned(&BPB[BPB_TOT_SEC_16_OFFSET],BPB_TOT_SEC_16_SIZE);
-  FATSz16 = bytesToUnsigned(&BPB[BPB_FAT_SZ16_OFFSET], BPB_FAT_SZ16_SIZE);
-  totalSectors32 = bytesToUnsigned(&BPB[BPB_TOT_SEC_32_OFFSET],BPB_TOT_SEC_32_SIZE);
+  bytesPerSector      = bytesToUnsigned(&BPB[BPB_BYTES_PER_SEC_OFFSET], BPB_BYTES_PER_SEC_SIZE);
+  sectorsPerCluster   = bytesToUnsigned(&BPB[BPB_SEC_PER_CLUS_OFFSET],  BPB_SEC_PER_CLUS_SIZE);
+  reservedSectorCount = bytesToUnsigned(&BPB[BPB_RSVD_SEC_CNT_OFFSET],  BPB_RSVD_SEC_CNT_SIZE);
+  rootEntryCount      = bytesToUnsigned(&BPB[BPB_ROOT_ENT_CNT_OFFSET],  BPB_ROOT_ENT_CNT_SIZE);
+  totalSectors16      = bytesToUnsigned(&BPB[BPB_TOT_SEC_16_OFFSET],    BPB_TOT_SEC_16_SIZE);
+  FATSz16             = bytesToUnsigned(&BPB[BPB_FAT_SZ16_OFFSET],      BPB_FAT_SZ16_SIZE);
+  totalSectors32      = bytesToUnsigned(&BPB[BPB_TOT_SEC_32_OFFSET],    BPB_TOT_SEC_32_SIZE);
 
   FATSz = BPB_NUM_FATS * FATSz16;
-  ROOTSz = rootEntityCount * ROOT_ENT_SZ / 512; //Dividing by 512 is black magic from a handout
+  ROOTSz = rootEntryCount * ROOT_ENT_SZ / 512; //Dividing by 512 is black magic from a handout
   FAT = new uint8_t[FATSz];
   ROOT = new uint8_t[ROOTSz];
   imageFile.read((char*)FAT, FATSz);
@@ -59,28 +59,32 @@ void FATData::fatls()
 
 void FATData::fatvol()
 {
-  cout << "OEM Name           : " << 0 << endl;
-  cout << "Bytes Per Sector   : " << 0 << endl;
-  cout << "Sectors Per Cluster: " << 0 << endl;
-  cout << "Reserved Sectors   : " << 0 << endl;
-  cout << "FAT Count          : " << 0 << endl;
-  cout << "Root Entry         : " << 0 << endl;
-  cout << "Sector Count 16    : " << 0 << endl;
-  cout << "Media              : " << 0 << endl;
-  cout << "FAT Size 16        : " << 0 << endl;
-  cout << "Sectors Per Track  : " << 0 << endl;
-  cout << "Head Count         : " << 0 << endl;
-  cout << "Hidden Sector Count: " << 0 << endl;
-  cout << "Sector Count 32    : " << 0 << endl;
-  cout << "Drive Number       : " << 0 << endl;
-  cout << "Boot Signature     : " << 0 << endl;
-  cout << "Volume ID          : " << 0 << endl;
-  cout << "Volume Label       : " << 0 << endl;
-  cout << "File System Type   : " << 0 << endl;
-  cout << "Root Dir Sectors   : " << 0 << endl;
-  cout << "First Root Sector  : " << 0 << endl;
-  cout << "First Data Sector  : " << 0 << endl;
-  cout << "Cluster Count      : " << 0 << endl;
+  unsigned int RootDirectorySectors = (rootEntryCount * 32) / 512;
+  unsigned int firstRootSector = reservedSectorCount + BPB_NUM_FATS * FATSz16;
+  unsigned int firstDataSector = firstRootSector + rootDirectorySectors;
+  unsigned int clusterCount = (totalSectors32 - firstDataSector) / sectorsPerCluster;
+  cout << "OEM Name           : " << (char*)&BPB2[3] << endl;
+  cout << "Bytes Per Sector   : " << bytesPerSector << endl;
+  cout << "Sectors Per Cluster: " << sectorsPerCluster << endl;
+  cout << "Reserved Sectors   : " << reservedSectorCount << endl;
+  cout << "FAT Count          : " << BPB_NUM_FATS << endl;
+  cout << "Root Entry         : " << rootEntryCount << endl;
+  cout << "Sector Count 16    : " << totalSectors16 << endl;
+  cout << "Media              : " << (unsigned int)BPB2[21] << endl;
+  cout << "FAT Size 16        : " << FATSz16 << endl;
+  cout << "Sectors Per Track  : " << bytesToUnsigned(&BPB2[24], 2) << endl;
+  cout << "Head Count         : " << bytesToUnsigned(&BPB2[26], 2) << endl;
+  cout << "Hidden Sector Count: " << bytesToUnsigned(&BPB2[28], 4) << endl;
+  cout << "Sector Count 32    : " << totalSectors32 << endl;
+  cout << "Drive Number       : " << bytesToUnsigned(&BPB2[36], 1) << endl;
+  cout << "Boot Signature     : " << bytesToUnsigned(&BPB2[38], 1) << endl;
+  cout << "Volume ID          : " << bytesToUnsigned(&BPB2[39], 4) << endl;
+  cout << "Volume Label       : " << (char*)&BPB2[43] << endl;
+  cout << "File System Type   : " << (char*)&BPB2[54] << endl;
+  cout << "Root Dir Sectors   : " << RootDirectorySectors << endl;
+  cout << "First Root Sector  : " << firstRootSector << endl;
+  cout << "First Data Sector  : " << firstDataSector << endl;
+  cout << "Cluster Count      : " << clusterCount << endl;
 }//void FATData::fatvol()
 
 //***************************************************************************//

@@ -120,8 +120,8 @@ void FATData::fatvol()
   cout << "Sector Count 32    : " << totalSectors32 << endl;
   cout << "Drive Number       : " << bytesToUnsigned(&BPB[36], 1) << endl;
   cout << "Boot Signature     : " << bytesToUnsigned(&BPB[38], 1) << endl;
-  cout << "Volume ID          : " << bytesToUnsigned(&BPB[39], 4) << endl;
-  cout << "Volume Label       : " << (char*)&BPB[43] << endl;
+  cout << "Volume ID          : " << bytesToUnsigned(&BPB[39], 4) << endl; //currently incorrect
+  cout << "Volume Label       : " << (char*)&BPB[43] << endl; //currently incorrect
   cout << "File System Type   : " << (char*)&BPB[54] << endl;
   cout << "Root Dir Sectors   : " << rootDirectorySectors << endl;
   cout << "First Root Sector  : " << firstRootSector << endl;

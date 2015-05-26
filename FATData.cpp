@@ -9,13 +9,11 @@ using namespace std;
 
 FATData::FATData(const char* mount)
 {
-  uint8_t* BPB = new uint8_t[BPB_SIZE];
-  BPB2 = new uint8_t[BPB_SIZE];
+  BPB = new uint8_t[BPB_SIZE];
   unsigned int FATSz;
   unsigned int ROOTSz;
   ifstream imageFile(mount, ios::in | ios::binary);
   imageFile.read((char*)BPB, BPB_SIZE);
-  memcpy(BPB2, BPB, BPB_SIZE);
 
   bytesPerSector      = bytesToUnsigned(&BPB[BPB_BYTES_PER_SEC_OFFSET], BPB_BYTES_PER_SEC_SIZE);
   sectorsPerCluster   = bytesToUnsigned(&BPB[BPB_SEC_PER_CLUS_OFFSET],  BPB_SEC_PER_CLUS_SIZE);
@@ -29,63 +27,113 @@ FATData::FATData(const char* mount)
   ROOTSz = rootEntryCount * ROOT_ENT_SZ / 512; //Dividing by 512 is black magic from a handout
   FAT = new uint8_t[FATSz];
   ROOT = new uint8_t[ROOTSz];
+
   imageFile.read((char*)FAT, FATSz);
   imageFile.read((char*)ROOT, ROOTSz);
-
   imageFile.close();
-  delete BPB;
+  rootEnts = new vector<SVMDirectoryEntry>;
+  for ( unsigned int rootEntStart = 0 ; rootEntStart < ROOTSz ; rootEntStart += ROOT_ENT_SZ )
+  {
+    addRootEntry(rootEntStart);
+  }//fill rootentries listing with the dirents in the root directory
 }//FATData constructor
 
 
 FATData::~FATData()
 {
-  delete BPB2;
-  delete FAT;
-  delete ROOT;
+  delete rootEnts;
+  delete[] BPB;
+  delete[] FAT;
+  delete[] ROOT;
 }//FATData destructor
 
 
-unsigned int FATData::getBytesPerSector()
+/*
+typedef struct{
+    char DLongFileName[VM_FILE_SYSTEM_MAX_PATH];
+    char DShortFileName[VM_FILE_SYSTEM_SFN_SIZE];
+    unsigned int DSize;
+    unsigned char DAttributes;
+    SVMDateTime DCreate;
+    SVMDateTime DAccess;
+    SVMDateTime DModify;
+} SVMDirectoryEntry, *SVMDirectoryEntryRef;
+
+typedef struct{
+    unsigned int DYear;
+    unsigned char DMonth;
+    unsigned char DDay;
+    unsigned char DHour;
+    unsigned char DMinute;
+    unsigned char DSecond;
+    unsigned char DHundredth;
+} SVMDateTime, *SVMDateTimeRef;
+*/
+
+
+void FATData::addRootEntry(unsigned int offset)
 {
-  return bytesPerSector;
-}//unsigned int FATData::getBytesPerSector()
+  SVMDirectoryEntry rootEnt;
+  fillDirEnt(&rootEnt, &ROOT[offset]);
+  rootEnts->push_back(rootEnt);
+}//void FATData::addRootEntry(unsigned int offset)
 
 
 void FATData::fatls()
 {
   cout << "   DATE   |  TIME  | TYPE |    SIZE   |    SFN      |  LFN\n";
+  cout << (*rootEnts)[0].DModify.DYear << "/" << (*rootEnts)[0].DModify.DMonth << "/" << (*rootEnts)[0].DModify.DDay << " ";
+  cout << ((*rootEnts)[0].DModify.DHour)%12 << ":" << (*rootEnts)[0].DModify.DMinute << " ";
+  if ((*rootEnts)[0].DModify.DHour/12)
+    cout << "PM";
+  else
+    cout << "AM";
+  cout << " ";
+  if ((*rootEnts)[0].DAttributes & VM_FILE_SYSTEM_ATTR_DIRECTORY)
+    cout << "<Dir>  ";
+  else
+    cout << "<File> ";
+// "xxx,x25,526" size
+  cout << "xxx,xxx,xxx ";
+  cout << (*rootEnts)[0].DShortFileName;
 }//void FATData::fatls()
 
 
 void FATData::fatvol()
 {
-  unsigned int RootDirectorySectors = (rootEntryCount * 32) / 512;
+  unsigned int rootDirectorySectors = (rootEntryCount * 32) / 512;
   unsigned int firstRootSector = reservedSectorCount + BPB_NUM_FATS * FATSz16;
   unsigned int firstDataSector = firstRootSector + rootDirectorySectors;
   unsigned int clusterCount = (totalSectors32 - firstDataSector) / sectorsPerCluster;
-  cout << "OEM Name           : " << (char*)&BPB2[3] << endl;
+  cout << "OEM Name           : " << (char*)&BPB[3] << endl;
   cout << "Bytes Per Sector   : " << bytesPerSector << endl;
   cout << "Sectors Per Cluster: " << sectorsPerCluster << endl;
   cout << "Reserved Sectors   : " << reservedSectorCount << endl;
   cout << "FAT Count          : " << BPB_NUM_FATS << endl;
   cout << "Root Entry         : " << rootEntryCount << endl;
   cout << "Sector Count 16    : " << totalSectors16 << endl;
-  cout << "Media              : " << (unsigned int)BPB2[21] << endl;
+  cout << "Media              : " << (unsigned int)BPB[21] << endl;
   cout << "FAT Size 16        : " << FATSz16 << endl;
-  cout << "Sectors Per Track  : " << bytesToUnsigned(&BPB2[24], 2) << endl;
-  cout << "Head Count         : " << bytesToUnsigned(&BPB2[26], 2) << endl;
-  cout << "Hidden Sector Count: " << bytesToUnsigned(&BPB2[28], 4) << endl;
+  cout << "Sectors Per Track  : " << bytesToUnsigned(&BPB[24], 2) << endl;
+  cout << "Head Count         : " << bytesToUnsigned(&BPB[26], 2) << endl;
+  cout << "Hidden Sector Count: " << bytesToUnsigned(&BPB[28], 4) << endl;
   cout << "Sector Count 32    : " << totalSectors32 << endl;
-  cout << "Drive Number       : " << bytesToUnsigned(&BPB2[36], 1) << endl;
-  cout << "Boot Signature     : " << bytesToUnsigned(&BPB2[38], 1) << endl;
-  cout << "Volume ID          : " << bytesToUnsigned(&BPB2[39], 4) << endl;
-  cout << "Volume Label       : " << (char*)&BPB2[43] << endl;
-  cout << "File System Type   : " << (char*)&BPB2[54] << endl;
-  cout << "Root Dir Sectors   : " << RootDirectorySectors << endl;
+  cout << "Drive Number       : " << bytesToUnsigned(&BPB[36], 1) << endl;
+  cout << "Boot Signature     : " << bytesToUnsigned(&BPB[38], 1) << endl;
+  cout << "Volume ID          : " << bytesToUnsigned(&BPB[39], 4) << endl;
+  cout << "Volume Label       : " << (char*)&BPB[43] << endl;
+  cout << "File System Type   : " << (char*)&BPB[54] << endl;
+  cout << "Root Dir Sectors   : " << rootDirectorySectors << endl;
   cout << "First Root Sector  : " << firstRootSector << endl;
   cout << "First Data Sector  : " << firstDataSector << endl;
   cout << "Cluster Count      : " << clusterCount << endl;
 }//void FATData::fatvol()
+
+
+unsigned int FATData::getBytesPerSector()
+{
+  return bytesPerSector;
+}//unsigned int FATData::getBytesPerSector()
 
 //***************************************************************************//
 // Begin Utility Functions for FATData                                       //

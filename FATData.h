@@ -38,12 +38,6 @@
 #define DIRENT_FILESIZE_SZ 4
 #define DIRENT_ATTR_OFFSET 11
 #define DIRENT_ATTR_SZ 1
-#define ATTR_READ_ONLY 0x01
-#define ATTR_HIDDEN 0x02
-#define ATTR_SYSTEM 0x04
-#define ATTR_VOLUME_ID 0x08
-#define ATTR_DIRECTORY 0x10
-#define ATTR_ARCHIVE 0x20
 #define ATTR_LONG_NAME (0x01 | 0x02 | 0x04 | 0x08 | 0x10 | 0x20)
 #define LO 0
 #define HI 1
@@ -51,6 +45,21 @@
 #include <stdint.h>
 #include "VirtualMachine.h"
 #include <cstring>
+#include <vector>
+
+using namespace std;
+
+/*
+typedef struct{
+    char DLongFileName[VM_FILE_SYSTEM_MAX_PATH];
+    char DShortFileName[VM_FILE_SYSTEM_SFN_SIZE];
+    unsigned int DSize;
+    unsigned char DAttributes;
+    SVMDateTime DCreate;
+    SVMDateTime DAccess;
+    SVMDateTime DModify;
+} SVMDirectoryEntry, *SVMDirectoryEntryRef;
+*/
 
 class FATData
 {
@@ -61,15 +70,18 @@ class FATData
   unsigned int totalSectors16;
   unsigned int FATSz16;
   unsigned int totalSectors32;
-  uint8_t* BPB2;
+  uint8_t* BPB;
   uint8_t* FAT;
   uint8_t* ROOT;
+
+  vector<SVMDirectoryEntry> *rootEnts;
 public:
   FATData(const char* mount);
   ~FATData();
-  unsigned int getBytesPerSector();
+  void addRootEntry(unsigned int offset);
   void fatls();
   void fatvol();
+  unsigned int getBytesPerSector();
 };
 
 unsigned int bytesToUnsigned(uint8_t* start, unsigned int size);

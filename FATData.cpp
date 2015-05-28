@@ -2,6 +2,7 @@
 #include <fstream>
 #include <iostream>
 #include <sys/stat.h>
+#include <unistd.h>
 
 
 using namespace std;
@@ -22,6 +23,11 @@ FATData::FATData(const char* mount)
   totalSectors16      = bytesToUnsigned(&BPB[BPB_TOT_SEC_16_OFFSET],    BPB_TOT_SEC_16_SIZE);
   FATSz16             = bytesToUnsigned(&BPB[BPB_FAT_SZ16_OFFSET],      BPB_FAT_SZ16_SIZE);
   totalSectors32      = bytesToUnsigned(&BPB[BPB_TOT_SEC_32_OFFSET],    BPB_TOT_SEC_32_SIZE);
+
+  unsigned int rootDirectorySectors = (rootEntryCount * 32) / 512;
+  unsigned int firstRootSector = reservedSectorCount + BPB_NUM_FATS * FATSz16;
+  dataStart = firstRootSector + rootDirectorySectors;
+  numClusters = (totalSectors32 - dataStart) / sectorsPerCluster;
 
   FATSz = BPB_NUM_FATS * FATSz16;
   ROOTSz = rootEntryCount * ROOT_ENT_SZ / 512; //Dividing by 512 is black magic from a handout
@@ -137,9 +143,12 @@ void FATData::fatvol()
   cout << "Sector Count 32    : " << totalSectors32 << endl;
   cout << "Drive Number       : " << bytesToUnsigned(&BPB[36], 1) << endl;
   cout << "Boot Signature     : " << bytesToUnsigned(&BPB[38], 1) << endl;
-  cout << "Volume ID          : " << bytesToUnsigned(&BPB[39], 4) << endl; //currently incorrect
-  cout << "Volume Label       : " << (char*)&BPB[43] << endl; //currently incorrect
-  cout << "File System Type   : " << (char*)&BPB[54] << endl;
+  cout << "Volume ID          : " << bytesToUnsigned(&BPB[39], 4) << endl;
+  cout << "Volume Label       : \"";
+  cout.flush();
+  write(1, (char*)&BPB[43], 11);
+  cout << "\"" << endl; //currently incorrect
+  cout << "File System Type   : \"" << (char*)&BPB[54] << "\"" << endl;
   cout << "Root Dir Sectors   : " << rootDirectorySectors << endl;
   cout << "First Root Sector  : " << firstRootSector << endl;
   cout << "First Data Sector  : " << firstDataSector << endl;

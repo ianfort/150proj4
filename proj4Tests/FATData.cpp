@@ -2,6 +2,7 @@
 #include <fstream>
 #include <iostream>
 #include <sys/stat.h>
+#include <unistd.h>
 
 
 using namespace std;
@@ -138,7 +139,7 @@ void FATData::fatvol()
   cout << "Drive Number       : " << bytesToUnsigned(&BPB[36], 1) << endl;
   cout << "Boot Signature     : " << bytesToUnsigned(&BPB[38], 1) << endl;
   cout << "Volume ID          : " << bytesToUnsigned(&BPB[39], 4) << endl; //currently incorrect
-  cout << "Volume Label       : " << (char*)&BPB[43] << endl; //currently incorrect
+  cout << "Volume Label       : '"; cout.flush(); write(1, (char*)&BPB[43], 11); cout << "'" << endl; //currently incorrect
   cout << "File System Type   : " << (char*)&BPB[54] << endl;
   cout << "Root Dir Sectors   : " << rootDirectorySectors << endl;
   cout << "First Root Sector  : " << firstRootSector << endl;

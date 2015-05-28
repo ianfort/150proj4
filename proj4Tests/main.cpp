@@ -14,6 +14,9 @@ int main()
   cout << "Calling FATls\n";
   testFAT->fatls();
   cout << endl;
+  cout << "Calling fatout\n";
+  testFAT->fatout();
+  cout << endl;
   delete testFAT;
 }
 

@@ -105,13 +105,13 @@ void FATData::fatout()
   unsigned int ROOTSz = rootEntryCount * ROOT_ENT_SZ / 512; //Dividing by 512 is black magic from a handout
 
   for (int i = 0; i < BPB_SIZE; i++)
-    cout << (int)BPB[i];
+    cout << (int)BPB[i] << ",";
   cout << "|" << endl;
   for (unsigned int i = 0; i < FATSz; i++)
-    cout << (unsigned int)FAT[i];
+    cout << (unsigned int)FAT[i] << ",";
   cout << "|" << endl;
   for (unsigned int i = 0; i < ROOTSz; i++)
-    cout << (unsigned int)ROOT[i];
+    cout << (unsigned int)ROOT[i] << ",";
   cout << "|" << endl;
 }//void FATData::fatout()
 

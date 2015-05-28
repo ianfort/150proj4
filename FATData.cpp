@@ -105,13 +105,13 @@ void FATData::fatout()
   unsigned int ROOTSz = rootEntryCount * ROOT_ENT_SZ / 512; //Dividing by 512 is black magic from a handout
 
   for (int i = 0; i < BPB_SIZE; i++)
-    cout << (int)BPB[i];
+    cout << (int)BPB[i] << ",";
   cout << "|" << endl;
   for (unsigned int i = 0; i < FATSz; i++)
-    cout << (unsigned int)FAT[i];
+    cout << (unsigned int)FAT[i] << ",";
   cout << "|" << endl;
   for (unsigned int i = 0; i < ROOTSz; i++)
-    cout << (unsigned int)ROOT[i];
+    cout << (unsigned int)ROOT[i] << ",";
   cout << "|" << endl;
 }//void FATData::fatout()
 
@@ -173,6 +173,19 @@ void fillDate(SVMDateTimeRef dt, uint8_t date[2])
   dt->DDay = 1 + (date[LO] & 31); //1111 1000 0000 0000
 }//void fillDate(SVMDateTimeRef dt, uint8_t date[2])
 
+//dir_name     208,188,0,124,184,176,7,142,
+//.extension   216,142,192,
+//Attr         185,
+//NTRes        0,
+//CRTTimeTenth 1,
+//CRTTime      139,241,
+//CRTDate      191,0,
+//LstAccDate   3,243,
+//FstClusHi    165,184,
+//WrtTime      208,7,
+//WrtDate      80,142,
+//FstClusLO    216,142,
+//DIR_Filesize 192,184,128,1
 
 void fillDirEnt(SVMDirectoryEntryRef dir, uint8_t* loc)
 {

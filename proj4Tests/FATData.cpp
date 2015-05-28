@@ -99,6 +99,23 @@ void FATData::fatls()
 }//void FATData::fatls()
 
 
+void FATData::fatout()
+{
+  unsigned int FATSz = BPB_NUM_FATS * FATSz16;
+  unsigned int ROOTSz = rootEntryCount * ROOT_ENT_SZ / 512; //Dividing by 512 is black magic from a handout
+
+  for (int i = 0; i < BPB_SIZE; i++)
+    cout << (int)BPB[i];
+  cout << "|" << endl;
+  for (unsigned int i = 0; i < FATSz; i++)
+    cout << (unsigned int)FAT[i];
+  cout << "|" << endl;
+  for (unsigned int i = 0; i < ROOTSz; i++)
+    cout << (unsigned int)ROOT[i];
+  cout << "|" << endl;
+}//void FATData::fatout()
+
+
 void FATData::fatvol()
 {
   unsigned int rootDirectorySectors = (rootEntryCount * 32) / 512;
@@ -120,8 +137,8 @@ void FATData::fatvol()
   cout << "Sector Count 32    : " << totalSectors32 << endl;
   cout << "Drive Number       : " << bytesToUnsigned(&BPB[36], 1) << endl;
   cout << "Boot Signature     : " << bytesToUnsigned(&BPB[38], 1) << endl;
-  cout << "Volume ID          : " << bytesToUnsigned(&BPB[39], 4) << endl;
-  cout << "Volume Label       : " << (char*)&BPB[43] << endl;
+  cout << "Volume ID          : " << bytesToUnsigned(&BPB[39], 4) << endl; //currently incorrect
+  cout << "Volume Label       : " << (char*)&BPB[43] << endl; //currently incorrect
   cout << "File System Type   : " << (char*)&BPB[54] << endl;
   cout << "Root Dir Sectors   : " << rootDirectorySectors << endl;
   cout << "First Root Sector  : " << firstRootSector << endl;

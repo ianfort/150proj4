@@ -99,6 +99,23 @@ void FATData::fatls()
 }//void FATData::fatls()
 
 
+void FATData::fatout()
+{
+  unsigned int FATSz = BPB_NUM_FATS * FATSz16;
+  unsigned int ROOTSz = rootEntryCount * ROOT_ENT_SZ / 512; //Dividing by 512 is black magic from a handout
+
+  for (int i = 0; i < BPB_SIZE; i++)
+    cout << (int)BPB[i];
+  cout << "|" << endl;
+  for (unsigned int i = 0; i < FATSz; i++)
+    cout << (unsigned int)FAT[i];
+  cout << "|" << endl;
+  for (unsigned int i = 0; i < ROOTSz; i++)
+    cout << (unsigned int)ROOT[i];
+  cout << "|" << endl;
+}//void FATData::fatout()
+
+
 void FATData::fatvol()
 {
   unsigned int rootDirectorySectors = (rootEntryCount * 32) / 512;

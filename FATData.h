@@ -80,6 +80,7 @@ public:
   ~FATData();
   void addRootEntry(unsigned int offset);
   void fatls();
+  void fatout();
   void fatvol();
   unsigned int getBytesPerSector();
 };

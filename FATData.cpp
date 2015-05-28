@@ -24,6 +24,11 @@ FATData::FATData(const char* mount)
   FATSz16             = bytesToUnsigned(&BPB[BPB_FAT_SZ16_OFFSET],      BPB_FAT_SZ16_SIZE);
   totalSectors32      = bytesToUnsigned(&BPB[BPB_TOT_SEC_32_OFFSET],    BPB_TOT_SEC_32_SIZE);
 
+  unsigned int rootDirectorySectors = (rootEntryCount * 32) / 512;
+  unsigned int firstRootSector = reservedSectorCount + BPB_NUM_FATS * FATSz16;
+  dataStart = firstRootSector + rootDirectorySectors;
+  numClusters = (totalSectors32 - dataStart) / sectorsPerCluster;
+
   FATSz = BPB_NUM_FATS * FATSz16;
   ROOTSz = rootEntryCount * ROOT_ENT_SZ / 512; //Dividing by 512 is black magic from a handout
   FAT = new uint8_t[FATSz];

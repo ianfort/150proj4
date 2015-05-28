@@ -70,6 +70,8 @@ class FATData
   unsigned int totalSectors16;
   unsigned int FATSz16;
   unsigned int totalSectors32;
+  unsigned int dataStart;
+  unsigned int numClusters;
   uint8_t* BPB;
   uint8_t* FAT;
   uint8_t* ROOT;

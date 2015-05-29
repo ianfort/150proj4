@@ -29,12 +29,14 @@ FATData::FATData(const char* mount)
   dataStart = firstRootSector + rootDirectorySectors;
   numClusters = (totalSectors32 - dataStart) / sectorsPerCluster;
 
-  FATSz = BPB_NUM_FATS * FATSz16;
-  ROOTSz = rootEntryCount * ROOT_ENT_SZ / 512; //Dividing by 512 is black magic from a handout
+  FATSz = BPB_NUM_FATS * FATSz16 * 512;
+  ROOTSz = rootEntryCount * ROOT_ENT_SZ;
   FAT = new uint8_t[FATSz];
   ROOT = new uint8_t[ROOTSz];
 
+  imageFile.seekg(bytesPerSector * reservedSectorCount);
   imageFile.read((char*)FAT, FATSz);
+  imageFile.seekg(bytesPerSector * (reservedSectorCount + BPB_NUM_FATS * FATSz16));
   imageFile.read((char*)ROOT, ROOTSz);
   imageFile.close();
   rootEnts = new vector<SVMDirectoryEntry>;
@@ -107,8 +109,8 @@ void FATData::fatls()
 
 void FATData::fatout()
 {
-  unsigned int FATSz = BPB_NUM_FATS * FATSz16;
-  unsigned int ROOTSz = rootEntryCount * ROOT_ENT_SZ / 512; //Dividing by 512 is black magic from a handout
+  unsigned int FATSz = BPB_NUM_FATS * FATSz16 * 512;
+  unsigned int ROOTSz = rootEntryCount * ROOT_ENT_SZ; //Dividing by 512 is black magic from a handout
 
   for (int i = 0; i < BPB_SIZE; i++)
     cout << (int)BPB[i] << ",";
@@ -178,23 +180,23 @@ unsigned int bytesToUnsigned(uint8_t* start, unsigned int size)
 void fillDate(SVMDateTimeRef dt, uint8_t date[2])
 {
   dt->DYear = 1980 + ((date[HI] << 1) & 127); //0000 0000 0111 1111
-  dt->DMonth = 1 + ((date[LO] << 5) & 7) + (date[HI] & 1); //0000 0111 1000 0000
-  dt->DDay = 1 + (date[LO] & 31); //1111 1000 0000 0000
+  dt->DMonth = ((date[LO] << 5) & 7) + (date[HI] & 1); //0000 0111 1000 0000
+  dt->DDay = (date[LO] & 31); //1111 1000 0000 0000
 }//void fillDate(SVMDateTimeRef dt, uint8_t date[2])
 
-//dir_name     208,188,0,124,184,176,7,142,
-//.extension   216,142,192,
-//Attr         185,
+//dir_name     65,97,0,112,0,112,0,115
+//.extension   0,255,255
+//Attr         15,
 //NTRes        0,
-//CRTTimeTenth 1,
-//CRTTime      139,241,
-//CRTDate      191,0,
-//LstAccDate   3,243,
-//FstClusHi    165,184,
-//WrtTime      208,7,
-//WrtDate      80,142,
-//FstClusLO    216,142,
-//DIR_Filesize 192,184,128,1
+//CRTTimeTenth 166,
+//CRTTime      255,255
+//CRTDate      255,255
+//LstAccDate   255,255
+//FstClusHi    255,255
+//WrtTime      255,255
+//WrtDate      255,255
+//FstClusLO    0,0
+//DIR_Filesize 255,255,255,255
 
 void fillDirEnt(SVMDirectoryEntryRef dir, uint8_t* loc)
 {

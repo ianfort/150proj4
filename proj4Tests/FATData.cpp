@@ -24,12 +24,19 @@ FATData::FATData(const char* mount)
   FATSz16             = bytesToUnsigned(&BPB[BPB_FAT_SZ16_OFFSET],      BPB_FAT_SZ16_SIZE);
   totalSectors32      = bytesToUnsigned(&BPB[BPB_TOT_SEC_32_OFFSET],    BPB_TOT_SEC_32_SIZE);
 
-  FATSz = BPB_NUM_FATS * FATSz16;
-  ROOTSz = rootEntryCount * ROOT_ENT_SZ / 512; //Dividing by 512 is black magic from a handout
+  unsigned int rootDirectorySectors = (rootEntryCount * 32) / 512;
+  unsigned int firstRootSector = reservedSectorCount + BPB_NUM_FATS * FATSz16;
+  dataStart = firstRootSector + rootDirectorySectors;
+  numClusters = (totalSectors32 - dataStart) / sectorsPerCluster;
+
+  FATSz = BPB_NUM_FATS * FATSz16 * 512;
+  ROOTSz = rootEntryCount * ROOT_ENT_SZ;
   FAT = new uint8_t[FATSz];
   ROOT = new uint8_t[ROOTSz];
 
+  imageFile.seekg(bytesPerSector * reservedSectorCount);
   imageFile.read((char*)FAT, FATSz);
+  imageFile.seekg(bytesPerSector * (reservedSectorCount + BPB_NUM_FATS * FATSz16));
   imageFile.read((char*)ROOT, ROOTSz);
   imageFile.close();
   rootEnts = new vector<SVMDirectoryEntry>;
@@ -102,8 +109,8 @@ void FATData::fatls()
 
 void FATData::fatout()
 {
-  unsigned int FATSz = BPB_NUM_FATS * FATSz16;
-  unsigned int ROOTSz = rootEntryCount * ROOT_ENT_SZ / 512; //Dividing by 512 is black magic from a handout
+  unsigned int FATSz = BPB_NUM_FATS * FATSz16 * 512;
+  unsigned int ROOTSz = rootEntryCount * ROOT_ENT_SZ; //Dividing by 512 is black magic from a handout
 
   for (int i = 0; i < BPB_SIZE; i++)
     cout << (int)BPB[i] << ",";
@@ -138,9 +145,12 @@ void FATData::fatvol()
   cout << "Sector Count 32    : " << totalSectors32 << endl;
   cout << "Drive Number       : " << bytesToUnsigned(&BPB[36], 1) << endl;
   cout << "Boot Signature     : " << bytesToUnsigned(&BPB[38], 1) << endl;
-  cout << "Volume ID          : " << bytesToUnsigned(&BPB[39], 4) << endl; //currently incorrect
-  cout << "Volume Label       : '"; cout.flush(); write(1, (char*)&BPB[43], 11); cout << "'" << endl; //currently incorrect
-  cout << "File System Type   : " << (char*)&BPB[54] << endl;
+  cout << "Volume ID          : " << bytesToUnsigned(&BPB[39], 4) << endl;
+  cout << "Volume Label       : \"";
+  cout.flush();
+  write(1, (char*)&BPB[43], 11);
+  cout << "\"" << endl; //currently incorrect
+  cout << "File System Type   : \"" << (char*)&BPB[54] << "\"" << endl;
   cout << "Root Dir Sectors   : " << rootDirectorySectors << endl;
   cout << "First Root Sector  : " << firstRootSector << endl;
   cout << "First Data Sector  : " << firstDataSector << endl;
@@ -170,10 +180,23 @@ unsigned int bytesToUnsigned(uint8_t* start, unsigned int size)
 void fillDate(SVMDateTimeRef dt, uint8_t date[2])
 {
   dt->DYear = 1980 + ((date[HI] << 1) & 127); //0000 0000 0111 1111
-  dt->DMonth = 1 + ((date[LO] << 5) & 7) + (date[HI] & 1); //0000 0111 1000 0000
-  dt->DDay = 1 + (date[LO] & 31); //1111 1000 0000 0000
+  dt->DMonth = ((date[LO] << 5) & 7) + (date[HI] & 1); //0000 0111 1000 0000
+  dt->DDay = (date[LO] & 31); //1111 1000 0000 0000
 }//void fillDate(SVMDateTimeRef dt, uint8_t date[2])
 
+//dir_name     65,97,0,112,0,112,0,115
+//.extension   0,255,255
+//Attr         15,
+//NTRes        0,
+//CRTTimeTenth 166,
+//CRTTime      255,255
+//CRTDate      255,255
+//LstAccDate   255,255
+//FstClusHi    255,255
+//WrtTime      255,255
+//WrtDate      255,255
+//FstClusLO    0,0
+//DIR_Filesize 255,255,255,255
 
 void fillDirEnt(SVMDirectoryEntryRef dir, uint8_t* loc)
 {

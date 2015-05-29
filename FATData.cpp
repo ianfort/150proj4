@@ -34,6 +34,7 @@ FATData::FATData(const char* mount)
   FAT = new uint8_t[FATSz];
   ROOT = new uint8_t[ROOTSz];
 
+  imageFile.seekg(bytesPerSector * reservedSectorCount);
   imageFile.read((char*)FAT, FATSz);
   imageFile.read((char*)ROOT, ROOTSz);
   imageFile.close();
@@ -178,11 +179,11 @@ unsigned int bytesToUnsigned(uint8_t* start, unsigned int size)
 void fillDate(SVMDateTimeRef dt, uint8_t date[2])
 {
   dt->DYear = 1980 + ((date[HI] << 1) & 127); //0000 0000 0111 1111
-  dt->DMonth = 1 + ((date[LO] << 5) & 7) + (date[HI] & 1); //0000 0111 1000 0000
-  dt->DDay = 1 + (date[LO] & 31); //1111 1000 0000 0000
+  dt->DMonth = ((date[LO] << 5) & 7) + (date[HI] & 1); //0000 0111 1000 0000
+  dt->DDay = (date[LO] & 31); //1111 1000 0000 0000
 }//void fillDate(SVMDateTimeRef dt, uint8_t date[2])
 
-//dir_name     208,188,0,124,184,176,7,142,
+//dir_name     208,188,0,124,184,176,7,142  
 //.extension   216,142,192,
 //Attr         185,
 //NTRes        0,
@@ -195,6 +196,17 @@ void fillDate(SVMDateTimeRef dt, uint8_t date[2])
 //WrtDate      80,142,
 //FstClusLO    216,142,
 //DIR_Filesize 192,184,128,1
+
+//day:     10110
+//month:    0101
+//year:  0100011
+//0110 1101 0110 0010
+
+//WRTDATE
+//0101 0000 1000 1110
+
+//LstAccDate   3,243,
+//0000 0011 1111 0011
 
 void fillDirEnt(SVMDirectoryEntryRef dir, uint8_t* loc)
 {

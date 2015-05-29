@@ -27,6 +27,7 @@
 *.out
 *.app
 vm
+FATTest
 
 # Temp Files and core
 *~

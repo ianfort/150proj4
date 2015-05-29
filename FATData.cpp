@@ -30,12 +30,13 @@ FATData::FATData(const char* mount)
   numClusters = (totalSectors32 - dataStart) / sectorsPerCluster;
 
   FATSz = BPB_NUM_FATS * FATSz16;
-  ROOTSz = rootEntryCount * ROOT_ENT_SZ / 512; //Dividing by 512 is black magic from a handout
+  ROOTSz = rootEntryCount * ROOT_ENT_SZ / 512; //Dividing by 512 bytes per sector
   FAT = new uint8_t[FATSz];
   ROOT = new uint8_t[ROOTSz];
 
   imageFile.seekg(bytesPerSector * reservedSectorCount);
   imageFile.read((char*)FAT, FATSz);
+  imageFile.seekg(bytesPerSector * (reservedSectorCount + BPB_NUM_FATS * FATSz16));
   imageFile.read((char*)ROOT, ROOTSz);
   imageFile.close();
   rootEnts = new vector<SVMDirectoryEntry>;

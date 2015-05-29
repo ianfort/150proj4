@@ -90,20 +90,20 @@ void FATData::addRootEntry(unsigned int offset)
 void FATData::fatls()
 {
   cout << "   DATE   |  TIME  | TYPE |    SIZE   |    SFN      |  LFN\n";
-  cout << (*rootEnts)[0].DModify.DYear << "/" << (*rootEnts)[0].DModify.DMonth << "/" << (*rootEnts)[0].DModify.DDay << " ";
-  cout << ((*rootEnts)[0].DModify.DHour)%12 << ":" << (*rootEnts)[0].DModify.DMinute << " ";
-  if ((*rootEnts)[0].DModify.DHour/12)
+  cout << rootEnts->at(1).DModify.DYear << "/" << (int)rootEnts->at(1).DModify.DMonth << "/" << (int)rootEnts->at(1).DModify.DDay << " ";
+  cout << (int)(rootEnts->at(1).DModify.DHour)%12 << ":" << (int)rootEnts->at(1).DModify.DMinute << " ";
+  if (rootEnts->at(1).DModify.DHour/12)
     cout << "PM";
   else
     cout << "AM";
   cout << " ";
-  if ((*rootEnts)[0].DAttributes & VM_FILE_SYSTEM_ATTR_DIRECTORY)
+  if (rootEnts->at(1).DAttributes & VM_FILE_SYSTEM_ATTR_DIRECTORY)
     cout << "<Dir>  ";
   else
     cout << "<File> ";
 // "xxx,x25,526" size
   cout << "xxx,xxx,xxx ";
-  cout << (*rootEnts)[0].DShortFileName;
+  cout << rootEnts->at(1).DShortFileName;
 }//void FATData::fatls()
 
 
@@ -179,24 +179,11 @@ unsigned int bytesToUnsigned(uint8_t* start, unsigned int size)
 
 void fillDate(SVMDateTimeRef dt, uint8_t date[2])
 {
-  dt->DYear = 1980 + ((date[HI] << 1) & 127); //0000 0000 0111 1111
-  dt->DMonth = ((date[LO] << 5) & 7) + (date[HI] & 1); //0000 0111 1000 0000
-  dt->DDay = (date[LO] & 31); //1111 1000 0000 0000
+  dt->DYear = 1980 + (((date[HI]) >> 1) & 255); //0000 0000 1111 1110
+  dt->DMonth = ((date[HI] & 1) << 1) + ((date[LO] >> 5) & 7); //1110 0000 0000 0001
+  dt->DDay = date[LO] & 31; //0001 1111 0000 0000
 }//void fillDate(SVMDateTimeRef dt, uint8_t date[2])
 
-//dir_name     65,97,0,112,0,112,0,115
-//.extension   0,255,255
-//Attr         15,
-//NTRes        0,
-//CRTTimeTenth 166,
-//CRTTime      255,255
-//CRTDate      255,255
-//LstAccDate   255,255
-//FstClusHi    255,255
-//WrtTime      255,255
-//WrtDate      255,255
-//FstClusLO    0,0
-//DIR_Filesize 255,255,255,255
 
 void fillDirEnt(SVMDirectoryEntryRef dir, uint8_t* loc)
 {
@@ -219,9 +206,9 @@ void fillDirEnt(SVMDirectoryEntryRef dir, uint8_t* loc)
 
 void fillTime(SVMDateTimeRef dt, uint8_t time[2], unsigned char dh)
 {
-  dt->DHour = ((time[HI] << 3) & 31); //0000 0000 0001 1111
-  dt->DMinute = ((time[LO] << 5) & 7) + (time[HI] & 7); //0000 0111 1110 0000
-  dt->DSecond = 2 * (time[LO] & 31); //1111 1000 0000 0000, 2-sec count
+  dt->DHour = ((time[HI] >> 3) & 31); //0000 0000 1111 1000
+  dt->DMinute = ((time[HI] & 7) << 3) + ((time[LO] >> 5) & 7);; //1110 0000 0000 0111
+  dt->DSecond = 2 * (time[LO] & 31); //0001 1111 0000 0000, 2-sec count
   dt->DHundredth = dh;
   if (dh >= 100)
   {

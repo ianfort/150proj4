@@ -699,6 +699,60 @@ TVMStatus VMMemoryPoolQuery(TVMMemoryPoolID memory, TVMMemorySizeRef bytesleft)
 // END MEMORY POOL FUNCTIONS                                                 //
 //***************************************************************************//
 //***************************************************************************//
+// START FAT DIRECTORY FUNCTIONS                                             //
+//***************************************************************************//
+
+TVMStatus VMDirectoryOpen(const char *dirname, int *dirdescriptor)
+{
+  MachineSuspendSignals(&sigs);
+  MachineResumeSignals(&sigs);
+  return VM_STATUS_SUCCESS;
+}
+
+
+TVMStatus VMDirectoryClose(int dirdescriptor)
+{
+  MachineSuspendSignals(&sigs);
+  MachineResumeSignals(&sigs);
+  return VM_STATUS_SUCCESS;
+}
+
+
+TVMStatus VMDirectoryRead(int dirdescriptor, SVMDirectoryEntryRef dirent)
+{
+  MachineSuspendSignals(&sigs);
+  MachineResumeSignals(&sigs);
+  return VM_STATUS_SUCCESS;
+}
+
+
+TVMStatus VMDirectoryRewind(int dirdescriptor)
+{
+  MachineSuspendSignals(&sigs);
+  MachineResumeSignals(&sigs);
+  return VM_STATUS_SUCCESS;
+}
+
+
+TVMStatus VMDirectoryCurrent(char *abspath)
+{
+  MachineSuspendSignals(&sigs);
+  MachineResumeSignals(&sigs);
+  return VM_STATUS_SUCCESS;
+}
+
+
+TVMStatus VMDirectoryChange(const char *path)
+{
+  MachineSuspendSignals(&sigs);
+  MachineResumeSignals(&sigs);
+  return VM_STATUS_SUCCESS;
+}
+
+//***************************************************************************//
+//END FAT DIRECTORY FUNCTIONS                                                //
+//***************************************************************************//
+//***************************************************************************//
 // START UTILITY FUNCTIONS                                                   //
 //***************************************************************************//
 void fileCallback(void* calldata, int result)

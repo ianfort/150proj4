@@ -29,8 +29,8 @@ FATData::FATData(const char* mount)
   dataStart = firstRootSector + rootDirectorySectors;
   numClusters = (totalSectors32 - dataStart) / sectorsPerCluster;
 
-  FATSz = BPB_NUM_FATS * FATSz16;
-  ROOTSz = rootEntryCount * ROOT_ENT_SZ / 512; //Dividing by 512 bytes per sector
+  FATSz = BPB_NUM_FATS * FATSz16 * 512;
+  ROOTSz = rootEntryCount * ROOT_ENT_SZ;
   FAT = new uint8_t[FATSz];
   ROOT = new uint8_t[ROOTSz];
 
@@ -109,8 +109,8 @@ void FATData::fatls()
 
 void FATData::fatout()
 {
-  unsigned int FATSz = BPB_NUM_FATS * FATSz16;
-  unsigned int ROOTSz = rootEntryCount * ROOT_ENT_SZ / 512; //Dividing by 512 is black magic from a handout
+  unsigned int FATSz = BPB_NUM_FATS * FATSz16 * 512;
+  unsigned int ROOTSz = rootEntryCount * ROOT_ENT_SZ; //Dividing by 512 is black magic from a handout
 
   for (int i = 0; i < BPB_SIZE; i++)
     cout << (int)BPB[i] << ",";
@@ -197,17 +197,6 @@ void fillDate(SVMDateTimeRef dt, uint8_t date[2])
 //WrtDate      255,255
 //FstClusLO    0,0
 //DIR_Filesize 255,255,255,255
-
-//day:     10110
-//month:    0101
-//year:  0100011
-//0110 1101 0110 0010
-
-//WRTDATE
-//0101 0000 1000 1110
-
-//LstAccDate   3,243,
-//0000 0011 1111 0011
 
 void fillDirEnt(SVMDirectoryEntryRef dir, uint8_t* loc)
 {

@@ -51,7 +51,7 @@ void VMMain(int argc, char *argv[]){
             }
             CharactersIn++;
         }
-        
+
         while(0 < CharactersIn){
             CharactersIn--;
             if(' ' != LineBuffer[CharactersIn]){

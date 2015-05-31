@@ -215,6 +215,7 @@ TVMStatus VMFileRead(int filedescriptor, void *data, int *length)
   int bytesread = 0;
   char *readloc;
   TVMStatus test = VM_STATUS_FAILURE;
+  retval[*length] = '\0';
   if (!data || !length)
   {
     MachineResumeSignals(&sigs);
@@ -242,6 +243,8 @@ TVMStatus VMFileRead(int filedescriptor, void *data, int *length)
     MachineResumeSignals(&sigs);
     return VM_STATUS_FAILURE;
   }//if the calldata was invalid
+  strcpy((char*)data, retval);
+  delete[] retval;
   MachineResumeSignals(&sigs);
   return VM_STATUS_SUCCESS;
 }//TVMStatus VMFileseek(int filedescriptor, int offset, int whence, int *newoffset)

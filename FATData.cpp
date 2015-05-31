@@ -153,7 +153,7 @@ unsigned int FATData::getBytesPerSector()
 }//unsigned int FATData::getBytesPerSector()
 
 
-string FATData::getFileContents(string fName /* Short file name? */)
+string FATData::getFileContents(string fName)
 {
   uint16_t *FATPtr;
   uint8_t dataOffset;

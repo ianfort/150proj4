@@ -46,6 +46,7 @@
 #include "VirtualMachine.h"
 #include <cstring>
 #include <vector>
+#include <string>
 
 using namespace std;
 
@@ -72,19 +73,23 @@ class FATData
   unsigned int totalSectors32;
   unsigned int dataStart;
   unsigned int numClusters;
+  char *imFileName;
   uint8_t* BPB;
-  uint8_t* FAT;
+  uint16_t* FAT; // TODO: Change code to work with uint16_t for FAT
   uint8_t* ROOT;
-
   vector<SVMDirectoryEntry> *rootEnts;
 public:
   FATData(const char* mount);
   ~FATData();
   void addRootEntry(unsigned int offset);
+  bool changeFileContents(uint16_t* fileStart);
   void fatls();
   void fatout();
   void fatvol();
   unsigned int getBytesPerSector();
+  string getFileContents(string fName);
+  bool newFileContents(string fName);
+  bool setFileContents(string fName, string newContents);
 };
 
 unsigned int bytesToUnsigned(uint8_t* start, unsigned int size);

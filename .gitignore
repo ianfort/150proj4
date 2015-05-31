@@ -33,3 +33,5 @@ FATTest
 *~
 core
 *.o*
+vm_shmem
+*.bak

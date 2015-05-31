@@ -64,29 +64,6 @@ FATData::~FATData()
 }//FATData destructor
 
 
-/*
-typedef struct{
-    char DLongFileName[VM_FILE_SYSTEM_MAX_PATH];
-    char DShortFileName[VM_FILE_SYSTEM_SFN_SIZE];
-    unsigned int DSize;
-    unsigned char DAttributes;
-    SVMDateTime DCreate;
-    SVMDateTime DAccess;
-    SVMDateTime DModify;
-} SVMDirectoryEntry, *SVMDirectoryEntryRef;
-
-typedef struct{
-    unsigned int DYear;
-    unsigned char DMonth;
-    unsigned char DDay;
-    unsigned char DHour;
-    unsigned char DMinute;
-    unsigned char DSecond;
-    unsigned char DHundredth;
-} SVMDateTime, *SVMDateTimeRef;
-*/
-
-
 void FATData::addRootEntry(unsigned int offset)
 {
   SVMDirectoryEntry rootEnt;
@@ -251,8 +228,8 @@ bool FATData::readFromFile(string fName, unsigned int length, string* ret)
   return true;
 }
 
-
-/*bool FATData::newFileContents(string fName)
+/*
+bool FATData::newFileContents(string fName)
 {
 }//bool FATData::newFileContents(string fName)
 */

@@ -29,6 +29,7 @@ uint8_t *VMPoolStart;
 void* sharebase;
 TVMMemoryPoolID shareid, heapid;
 FATData* VMFAT;
+string curPath;
 
 const TVMMemoryPoolID VM_MEMORY_POOL_ID_SYSTEM = 0;
 
@@ -37,6 +38,7 @@ int argc, char *argv[])
 {
   TVMThreadID idletid;
   TVMMemorySize share = (sharedsize+0xFFF)&(~0xFFF);
+  curPath = "/";
 
   TVMMainEntry mainFunc = VMLoadModule(argv[0]);
   if (!mainFunc)
@@ -79,19 +81,17 @@ int argc, char *argv[])
     VMThreadTerminate(*((*itr)->getIDRef()));
     delete *itr;
   }//for all threads
+  delete threads;
   for (vector<Mutex*>::iterator itr = mutexes->begin(); itr != mutexes->end(); itr++)
   {
     VMMutexDelete((*itr)->getID());
   }//for all threads
-  delete threads;
   delete mutexes;
-
   for (vector<MPCB*>::iterator itr = pools->begin() ; itr != pools->end() ; itr++)
   {
     delete *itr;
   }
   delete pools;
-  delete heap;
 
   return VM_STATUS_SUCCESS;
 } //VMStart
@@ -213,6 +213,7 @@ TVMStatus VMFileRead(int filedescriptor, void *data, int *length)
   int bytesread = 0;
   char *readloc;
   TVMStatus test = VM_STATUS_FAILURE;
+  retval[*length] = '\0';
   if (!data || !length)
   {
     MachineResumeSignals(&sigs);
@@ -240,6 +241,8 @@ TVMStatus VMFileRead(int filedescriptor, void *data, int *length)
     MachineResumeSignals(&sigs);
     return VM_STATUS_FAILURE;
   }//if the calldata was invalid
+  strcpy((char*)data, retval);
+  delete[] retval;
   MachineResumeSignals(&sigs);
   return VM_STATUS_SUCCESS;
 }//TVMStatus VMFileseek(int filedescriptor, int offset, int whence, int *newoffset)
@@ -707,7 +710,7 @@ TVMStatus VMDirectoryOpen(const char *dirname, int *dirdescriptor)
   MachineSuspendSignals(&sigs);
   MachineResumeSignals(&sigs);
   return VM_STATUS_SUCCESS;
-}
+}//TVMStatus VMDirectoryOpen(const char *dirname, int *dirdescriptor)
 
 
 TVMStatus VMDirectoryClose(int dirdescriptor)
@@ -715,7 +718,7 @@ TVMStatus VMDirectoryClose(int dirdescriptor)
   MachineSuspendSignals(&sigs);
   MachineResumeSignals(&sigs);
   return VM_STATUS_SUCCESS;
-}
+}//TVMStatus VMDirectoryClose(int dirdescriptor)
 
 
 TVMStatus VMDirectoryRead(int dirdescriptor, SVMDirectoryEntryRef dirent)
@@ -723,7 +726,7 @@ TVMStatus VMDirectoryRead(int dirdescriptor, SVMDirectoryEntryRef dirent)
   MachineSuspendSignals(&sigs);
   MachineResumeSignals(&sigs);
   return VM_STATUS_SUCCESS;
-}
+}//TVMStatus VMDirectoryRead(int dirdescriptor, SVMDirectoryEntryRef dirent)
 
 
 TVMStatus VMDirectoryRewind(int dirdescriptor)
@@ -731,15 +734,21 @@ TVMStatus VMDirectoryRewind(int dirdescriptor)
   MachineSuspendSignals(&sigs);
   MachineResumeSignals(&sigs);
   return VM_STATUS_SUCCESS;
-}
+}//TVMStatus VMDirectoryRewind(int dirdescriptor)
 
 
 TVMStatus VMDirectoryCurrent(char *abspath)
 {
   MachineSuspendSignals(&sigs);
+  if (!abspath)
+  {
+    MachineResumeSignals(&sigs);
+    return VM_STATUS_ERROR_INVALID_PARAMETER;
+  }//if abspath is a NULL pointer
+  strcpy(abspath, curPath.c_str());
   MachineResumeSignals(&sigs);
   return VM_STATUS_SUCCESS;
-}
+}//TVMStatus VMDirectoryCurrent(char *abspath)
 
 
 TVMStatus VMDirectoryChange(const char *path)
@@ -747,8 +756,23 @@ TVMStatus VMDirectoryChange(const char *path)
   MachineSuspendSignals(&sigs);
   MachineResumeSignals(&sigs);
   return VM_STATUS_SUCCESS;
-}
+}//TVMStatus VMDirectoryChange(const char *path)
 
+
+TVMStatus VMDirectoryCreate(const char *dirname)
+{//EXTRA CREDIT
+  MachineSuspendSignals(&sigs);
+  MachineResumeSignals(&sigs);
+  return VM_STATUS_SUCCESS;
+}//TVMStatus VMDirectoryCreate(const char *dirname)
+
+
+TVMStatus VMDirectoryUnlink(const char *path)
+{//EXTRA CREDIT
+  MachineSuspendSignals(&sigs);
+  MachineResumeSignals(&sigs);
+  return VM_STATUS_SUCCESS;
+}//TVMStatus VMDirectoryUnlink(const char *path)
 //***************************************************************************//
 //END FAT DIRECTORY FUNCTIONS                                                //
 //***************************************************************************//

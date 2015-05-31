@@ -115,6 +115,8 @@ TVMStatus VMDirectoryRead(int dirdescriptor, SVMDirectoryEntryRef dirent);
 TVMStatus VMDirectoryRewind(int dirdescriptor);
 TVMStatus VMDirectoryCurrent(char *abspath);
 TVMStatus VMDirectoryChange(const char *path);
+TVMStatus VMDirectoryCreate(const char *dirname);
+TVMStatus VMDirectoryUnlink(const char *path);
 
 TVMStatus VMFileSystemValidPathName(const char *name);
 TVMStatus VMFileSystemIsRelativePath(const char *name);

@@ -199,7 +199,9 @@ string FATData::getFileContents(string fName /* Short file name? */)
       break;
     }
     
-    // TODO: Calculate new FATPtr location, and new data offset
+    // Calculate new FATPtr location, and new data offset
+    dataOffset = *FATPtr * clusterSize;
+    FATPtr = &FAT[*FATPtr];
   }
   imageFile.close();
   delete [] curDataCluster;
@@ -207,13 +209,61 @@ string FATData::getFileContents(string fName /* Short file name? */)
 }
 
 
-void FATData::setFileContents(string fName, string newContents)
+bool FATData::changeFileContents(uint16* fileStart)
 {
-  uint16_t *FATPtr;
+  // Don't change the file name. Instead, follow FAT chain, overwriting data um
+}
+
+
+bool FATData::newFileContents(string fName)
+{
+}
+
+
+bool FATData::setFileContents(string fName, string newContents)
+{
+  uint16_t *FATPtr = NULL;
+  uint16_t *nextFATPtr = NULL;
   uint8_t dataOffset;
   unsigned int clusterSize = bytesPerSector * sectorsPerCluster;
+  unsigned int newContentsOffset;
+  unsigned int i;
+
+  ofstream imageFile(imFileName, ios::out | ios::binary);
+  seekp(dataStart);
+
+  if (/* TODO: filename not found in vector */)
+  {
+    for ( i = 1 ; i < FATSz16 ; i++ )
+    {
+      if (FAT[i] == 0)
+      {
+        FATPtr = &FAT[i];
+        break;
+      }
+    }
+  }
+  else
+  {
+    // TODO replace start entry
+  }
+
+  if (!FATPtr)
+  {
+    return false;
+  }
+
+  for ( ++i ; i < FATSz16 ; i++)
+  {
+    {
+      FATPtr = &FAT[i];
+      break;
+    }
+  }
   
   // TODO: Find first unallocated FAT entry and store it in FATPtr.
+  // TODO: Find next unallocated FAT entry and store it in nextFATPtr
+  // TODO: Modify value of FAT entry stored in FATPtr to point to nextFATPtr
 }
 
 

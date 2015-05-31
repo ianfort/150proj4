@@ -74,7 +74,7 @@ class FATData
   unsigned int numClusters;
   char *imFileName;
   uint8_t* BPB;
-  uint8_t* FAT; // TODO: Change to uint16_t and modify code in other places so it still works
+  uint16_t* FAT; // TODO: Change code to work with uint16_t for FAT
   uint8_t* ROOT;
   
   

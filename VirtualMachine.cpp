@@ -29,6 +29,7 @@ uint8_t *VMPoolStart;
 void* sharebase;
 TVMMemoryPoolID shareid, heapid;
 FATData* VMFAT;
+string curPath;
 
 const TVMMemoryPoolID VM_MEMORY_POOL_ID_SYSTEM = 0;
 
@@ -37,6 +38,7 @@ int argc, char *argv[])
 {
   TVMThreadID idletid;
   TVMMemorySize share = (sharedsize+0xFFF)&(~0xFFF);
+  curPath = "/";
 
   TVMMainEntry mainFunc = VMLoadModule(argv[0]);
   if (!mainFunc)
@@ -737,6 +739,12 @@ TVMStatus VMDirectoryRewind(int dirdescriptor)
 TVMStatus VMDirectoryCurrent(char *abspath)
 {
   MachineSuspendSignals(&sigs);
+  if (!abspath)
+  {
+    MachineResumeSignals(&sigs);
+    return VM_STATUS_ERROR_INVALID_PARAMETER;
+  }//if abspath is a NULL pointer
+  strcpy(abspath, curPath.c_str());
   MachineResumeSignals(&sigs);
   return VM_STATUS_SUCCESS;
 }//TVMStatus VMDirectoryCurrent(char *abspath)
@@ -751,7 +759,7 @@ TVMStatus VMDirectoryChange(const char *path)
 
 
 TVMStatus VMDirectoryCreate(const char *dirname)
-{
+{//EXTRA CREDIT
   MachineSuspendSignals(&sigs);
   MachineResumeSignals(&sigs);
   return VM_STATUS_SUCCESS;
@@ -759,7 +767,7 @@ TVMStatus VMDirectoryCreate(const char *dirname)
 
 
 TVMStatus VMDirectoryUnlink(const char *path)
-{
+{//EXTRA CREDIT
   MachineSuspendSignals(&sigs);
   MachineResumeSignals(&sigs);
   return VM_STATUS_SUCCESS;

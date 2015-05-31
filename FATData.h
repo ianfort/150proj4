@@ -72,9 +72,12 @@ class FATData
   unsigned int totalSectors32;
   unsigned int dataStart;
   unsigned int numClusters;
+  char *imFileName;
   uint8_t* BPB;
-  uint8_t* FAT;
+  uint8_t* FAT; // TODO: Change to uint16_t and modify code in other places so it still works
   uint8_t* ROOT;
+  
+  
 
   vector<SVMDirectoryEntry> *rootEnts;
 public:
@@ -85,6 +88,8 @@ public:
   void fatout();
   void fatvol();
   unsigned int getBytesPerSector();
+  string getFileContents(string fName);
+  void setFileContents(string fName, string newContents);
 };
 
 unsigned int bytesToUnsigned(uint8_t* start, unsigned int size);

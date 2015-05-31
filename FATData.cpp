@@ -3,6 +3,8 @@
 #include <iostream>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <string>
+#include <cstring>
 
 
 using namespace std;
@@ -10,6 +12,9 @@ using namespace std;
 
 FATData::FATData(const char* mount)
 {
+  unsigned int imFileNameLen = strlen(mount);
+  imFileName = new char[imFileNameLen];
+  memcpy(imFileName, mount, imFileNameLen);
   BPB = new uint8_t[BPB_SIZE];
   unsigned int FATSz;
   unsigned int ROOTSz;
@@ -53,6 +58,7 @@ FATData::~FATData()
   delete[] BPB;
   delete[] FAT;
   delete[] ROOT;
+  delete[] imFileName;
 }//FATData destructor
 
 
@@ -162,6 +168,54 @@ unsigned int FATData::getBytesPerSector()
 {
   return bytesPerSector;
 }//unsigned int FATData::getBytesPerSector()
+
+
+string FATData::getFileContents(string fName /* Short file name? */)
+{
+  uint16_t *FATPtr;
+  uint8_t dataOffset;
+  unsigned int clusterSize = bytesPerSector * sectorsPerCluster;
+  char *curDataCluster;
+  curDataCluster = new char[clusterSize];
+  unsigned int curDataSize;
+  string retStr;
+  
+  // TODO: Search vector of root entries for file with proper name, and get starting point.
+  // Store it in FATPtr and dataOffset.
+  
+  ifstream imageFile(imFileName, ios::in | ios::binary); // TODO: fstream method temporary. To be replaced by MachineFile function calls.
+  // Note: Maybe make a wrapper function to make it easier?
+  
+  while (true)
+  {
+    imageFile.seekg(dataStart + dataOffset);
+    imageFile.read(curDataCluster, clusterSize);
+    // TODO: Detect how much data is in cluster. Store in curDataSize
+    // curDataSize should equal clusterSize in all but the last cluster in the chain.
+    retStr.append(curDataCluster, curDataSize);
+    
+    if (!*FATPtr || *FATPtr == 0xfff8)
+    {
+      break;
+    }
+    
+    // TODO: Calculate new FATPtr location, and new data offset
+  }
+  imageFile.close();
+  delete [] curDataCluster;
+  return retStr;
+}
+
+
+void FATData::setFileContents(string fName, string newContents)
+{
+  uint16_t *FATPtr;
+  uint8_t dataOffset;
+  unsigned int clusterSize = bytesPerSector * sectorsPerCluster;
+  
+  // TODO: Find first unallocated FAT entry and store it in FATPtr.
+}
+
 
 //***************************************************************************//
 // Begin Utility Functions for FATData                                       //

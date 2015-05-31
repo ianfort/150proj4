@@ -93,7 +93,7 @@ void VMMain(int argc, char *argv[]){
                 VMPrint("Failed to open directory %s!\n", DirectoryName);   
             }
         }
-        else if(StringMatchN(LineBuffer,"cd",2)){
+        else if(StringMatchN(LineBuffer,"cd ",3)){
             CharactersIn = 2;
             while(' ' == LineBuffer[CharactersIn]){
                 CharactersIn++;
@@ -106,7 +106,33 @@ void VMMain(int argc, char *argv[]){
                 VMPrint("Failed to change directory to %s!\n", LineBuffer + CharactersIn);
             }
         }
-        else if(StringMatchN(LineBuffer,"cat",3)){
+        else if(StringMatchN(LineBuffer,"rm ",3)){
+            CharactersIn = 2;
+            while(' ' == LineBuffer[CharactersIn]){
+                CharactersIn++;
+            }
+            if('\0' == LineBuffer[CharactersIn]){
+                CharactersIn--;
+                LineBuffer[CharactersIn] = '/';
+            }
+            if(VM_STATUS_SUCCESS != VMDirectoryUnlink(LineBuffer + CharactersIn)){
+                VMPrint("Failed to remove node %s!\n", LineBuffer + CharactersIn);
+            }
+        }
+        else if(StringMatchN(LineBuffer,"mkdir ",6)){
+            CharactersIn = 5;
+            while(' ' == LineBuffer[CharactersIn]){
+                CharactersIn++;
+            }
+            if('\0' == LineBuffer[CharactersIn]){
+                CharactersIn--;
+                LineBuffer[CharactersIn] = '/';
+            }
+            if(VM_STATUS_SUCCESS != VMDirectoryCreate(LineBuffer + CharactersIn)){
+                VMPrint("Failed to create directory %s!\n", LineBuffer + CharactersIn);
+            }
+        }
+        else if(StringMatchN(LineBuffer,"cat ",4)){
             CharactersIn = 3;
             while(' ' == LineBuffer[CharactersIn]){
                 CharactersIn++;

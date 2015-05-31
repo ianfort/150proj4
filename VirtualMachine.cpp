@@ -750,6 +750,14 @@ TVMStatus VMDirectoryChange(const char *path)
 }//TVMStatus VMDirectoryChange(const char *path)
 
 
+TVMStatus VMDirectoryCreate(const char *dirname)
+{
+  MachineSuspendSignals(&sigs);
+  MachineResumeSignals(&sigs);
+  return VM_STATUS_SUCCESS;
+}//TVMStatus VMDirectoryCreate(const char *dirname)
+
+
 TVMStatus VMDirectoryUnlink(const char *path)
 {
   MachineSuspendSignals(&sigs);

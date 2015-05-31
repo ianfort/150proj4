@@ -34,9 +34,9 @@ FATData::FATData(const char* mount)
   dataStart = firstRootSector + rootDirectorySectors;
   numClusters = (totalSectors32 - dataStart) / sectorsPerCluster;
 
-  FATSz = BPB_NUM_FATS * FATSz16 * 512;
+  FATSz = BPB_NUM_FATS * FATSz16 * bytesPerSector / 2; //divide by two because grabbing two bytes at a time
   ROOTSz = rootEntryCount * ROOT_ENT_SZ;
-  FAT = new uint8_t[FATSz];
+  FAT = new uint16_t[FATSz];
   ROOT = new uint8_t[ROOTSz];
 
   imageFile.seekg(bytesPerSector * reservedSectorCount);
@@ -91,6 +91,12 @@ void FATData::addRootEntry(unsigned int offset)
   fillDirEnt(&rootEnt, &ROOT[offset]);
   rootEnts->push_back(rootEnt);
 }//void FATData::addRootEntry(unsigned int offset)
+
+
+bool FATData::changeFileContents(uint16_t* fileStart)
+{
+  // Don't change the file name. Instead, follow FAT chain, overwriting data um
+}
 
 
 void FATData::fatls()
@@ -209,15 +215,9 @@ string FATData::getFileContents(string fName /* Short file name? */)
 }
 
 
-bool FATData::changeFileContents(uint16* fileStart)
-{
-  // Don't change the file name. Instead, follow FAT chain, overwriting data um
-}
-
-
 bool FATData::newFileContents(string fName)
 {
-}
+}//bool FATData::newFileContents(string fName)
 
 
 bool FATData::setFileContents(string fName, string newContents)
@@ -230,7 +230,7 @@ bool FATData::setFileContents(string fName, string newContents)
   unsigned int i;
 
   ofstream imageFile(imFileName, ios::out | ios::binary);
-  seekp(dataStart);
+  imageFile.seekp(dataStart);
 
   if (/* TODO: filename not found in vector */)
   {

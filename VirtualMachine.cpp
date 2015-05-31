@@ -81,19 +81,17 @@ int argc, char *argv[])
     VMThreadTerminate(*((*itr)->getIDRef()));
     delete *itr;
   }//for all threads
+  delete threads;
   for (vector<Mutex*>::iterator itr = mutexes->begin(); itr != mutexes->end(); itr++)
   {
     VMMutexDelete((*itr)->getID());
   }//for all threads
-  delete threads;
   delete mutexes;
-
   for (vector<MPCB*>::iterator itr = pools->begin() ; itr != pools->end() ; itr++)
   {
     delete *itr;
   }
   delete pools;
-  delete heap;
 
   return VM_STATUS_SUCCESS;
 } //VMStart

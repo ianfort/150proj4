@@ -75,9 +75,10 @@ class FATData
   unsigned int numClusters;
   char *imFileName;
   uint8_t* BPB;
-  uint16_t* FAT; // TODO: Change code to work with uint16_t for FAT
+  uint16_t* FAT;
   uint8_t* ROOT;
   vector<SVMDirectoryEntry> *rootEnts;
+  vector<unsigned int> *fileStarts;
 public:
   FATData(const char* mount);
   ~FATData();
@@ -87,15 +88,14 @@ public:
   void fatout();
   void fatvol();
   unsigned int getBytesPerSector();
-  string getFileContents(string fName);
-  bool newFileContents(string fName);
-  bool setFileContents(string fName, string newContents);
+  bool readFromFile(string fName, unsigned int length, string* ret);
+  bool writeToFile(string fName, string newContents);
 };
 
 unsigned int bytesToUnsigned(uint8_t* start, unsigned int size);
 void fillDate(SVMDateTimeRef dt, uint8_t date[2]);
 void fillDirEnt(SVMDirectoryEntryRef dir, uint8_t* loc);
 void fillTime(SVMDateTimeRef dt, uint8_t time[2], unsigned char dh = 0);
-
+string convertFNameToShort(string toConvert);
 
 #endif

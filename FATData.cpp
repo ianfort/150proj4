@@ -45,6 +45,7 @@ FATData::FATData(const char* mount)
   imageFile.read((char*)ROOT, ROOTSz);
   imageFile.close();
   rootEnts = new vector<SVMDirectoryEntry>;
+  fileStarts = new vector <unsigned int>;
   for ( unsigned int rootEntStart = 0 ; rootEntStart < ROOTSz ; rootEntStart += ROOT_ENT_SZ )
   {
     addRootEntry(rootEntStart);
@@ -55,6 +56,7 @@ FATData::FATData(const char* mount)
 FATData::~FATData()
 {
   delete rootEnts;
+  delete fileStarts;
   delete[] BPB;
   delete[] FAT;
   delete[] ROOT;
@@ -90,6 +92,8 @@ void FATData::addRootEntry(unsigned int offset)
   SVMDirectoryEntry rootEnt;
   fillDirEnt(&rootEnt, &ROOT[offset]);
   rootEnts->push_back(rootEnt);
+
+  fileStarts->push_back( bytesToUnsigned(&ROOT[offset + 26], 2) );
 }//void FATData::addRootEntry(unsigned int offset)
 
 
@@ -176,18 +180,37 @@ unsigned int FATData::getBytesPerSector()
 }//unsigned int FATData::getBytesPerSector()
 
 
-string FATData::getFileContents(string fName)
+bool FATData::readFromFile(string fName, unsigned int length, string* ret)
 {
-  uint16_t *FATPtr;
-  uint8_t dataOffset;
+  bool success = false;
+  unsigned int FATOffset;
+  unsigned int dataOffset;
   unsigned int clusterSize = bytesPerSector * sectorsPerCluster;
   char *curDataCluster;
   curDataCluster = new char[clusterSize];
   unsigned int curDataSize;
   string retStr;
-  
-  // TODO: Search vector of root entries for file with proper name, and get starting point.
+  unsigned int l = length;
+  string shortFName = convertFNameToShort(fName);
+
+  // Search vector of root entries for file with proper name, and get starting point.
   // Store it in FATPtr and dataOffset.
+  for ( vector<SVMDirectoryEntry>::iterator entItr = rootEnts->begin() ;
+        entItr != rootEnts->end() ; entItr++) 
+  {
+    if ( shortFName == string((*entItr).DShortFileName) )
+    {
+      FATOffset = fileStarts->at(entItr - rootEnts->begin());
+      dataOffset = FATOffset * clusterSize;
+      success = true;
+      break;
+    }
+  }
+
+  if (!success)
+  {
+    return false;
+  }
   
   ifstream imageFile(imFileName, ios::in | ios::binary); // TODO: fstream method temporary. To be replaced by MachineFile function calls.
   // Note: Maybe make a wrapper function to make it easier?
@@ -198,29 +221,43 @@ string FATData::getFileContents(string fName)
     imageFile.read(curDataCluster, clusterSize);
     // TODO: Detect how much data is in cluster. Store in curDataSize
     // curDataSize should equal clusterSize in all but the last cluster in the chain.
+
+    if (l < curDataSize)
+    {
+      retStr.append(curDataCluster, l);
+      break;
+    }
     retStr.append(curDataCluster, curDataSize);
     
-    if (!*FATPtr || *FATPtr == 0xfff8)
+
+    if (!FAT[FATOffset])
+    {
+      return false;
+    }
+    if (FAT[FATOffset] == 0xfff8)
     {
       break;
     }
     
     // Calculate new FATPtr location, and new data offset
-    dataOffset = *FATPtr * clusterSize;
-    FATPtr = &FAT[*FATPtr];
+    dataOffset = (unsigned int)FAT[FATOffset] * clusterSize;
+    FATOffset = (unsigned int)FAT[FATOffset];
+    l -= clusterSize;
   }
   imageFile.close();
   delete [] curDataCluster;
-  return retStr;
+
+  *ret = retStr;
+  return true;
 }
 
 
-bool FATData::newFileContents(string fName)
+/*bool FATData::newFileContents(string fName)
 {
 }//bool FATData::newFileContents(string fName)
+*/
 
-
-bool FATData::setFileContents(string fName, string newContents)
+bool FATData::writeToFile(string fName, string newContents)
 {
   uint16_t *FATPtr = NULL;
   uint16_t *nextFATPtr = NULL;
@@ -232,7 +269,7 @@ bool FATData::setFileContents(string fName, string newContents)
   ofstream imageFile(imFileName, ios::out | ios::binary);
   imageFile.seekp(dataStart);
 
-  if (/* TODO: filename not found in vector */)
+  if ( true /* TODO: if filename not found in vector */)
   {
     for ( i = 1 ; i < FATSz16 ; i++ )
     {
@@ -322,3 +359,7 @@ void fillTime(SVMDateTimeRef dt, uint8_t time[2], unsigned char dh)
 }//void fillTime(SVMDateTimeRef dt, uint8_t time[2], unsigned char dh)
 
 
+string convertFNameToShort(string toConvert)
+{
+  return string("SAMPLE  TXT");
+}

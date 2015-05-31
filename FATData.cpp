@@ -62,29 +62,6 @@ FATData::~FATData()
 }//FATData destructor
 
 
-/*
-typedef struct{
-    char DLongFileName[VM_FILE_SYSTEM_MAX_PATH];
-    char DShortFileName[VM_FILE_SYSTEM_SFN_SIZE];
-    unsigned int DSize;
-    unsigned char DAttributes;
-    SVMDateTime DCreate;
-    SVMDateTime DAccess;
-    SVMDateTime DModify;
-} SVMDirectoryEntry, *SVMDirectoryEntryRef;
-
-typedef struct{
-    unsigned int DYear;
-    unsigned char DMonth;
-    unsigned char DDay;
-    unsigned char DHour;
-    unsigned char DMinute;
-    unsigned char DSecond;
-    unsigned char DHundredth;
-} SVMDateTime, *SVMDateTimeRef;
-*/
-
-
 void FATData::addRootEntry(unsigned int offset)
 {
   SVMDirectoryEntry rootEnt;
@@ -232,7 +209,7 @@ bool FATData::setFileContents(string fName, string newContents)
   ofstream imageFile(imFileName, ios::out | ios::binary);
   imageFile.seekp(dataStart);
 
-  if (/* TODO: filename not found in vector */)
+  if (/* TODO: filename not found in vector */ true ) //true so it compiles
   {
     for ( i = 1 ; i < FATSz16 ; i++ )
     {

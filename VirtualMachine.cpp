@@ -707,7 +707,7 @@ TVMStatus VMDirectoryOpen(const char *dirname, int *dirdescriptor)
   MachineSuspendSignals(&sigs);
   MachineResumeSignals(&sigs);
   return VM_STATUS_SUCCESS;
-}
+}//TVMStatus VMDirectoryOpen(const char *dirname, int *dirdescriptor)
 
 
 TVMStatus VMDirectoryClose(int dirdescriptor)
@@ -715,7 +715,7 @@ TVMStatus VMDirectoryClose(int dirdescriptor)
   MachineSuspendSignals(&sigs);
   MachineResumeSignals(&sigs);
   return VM_STATUS_SUCCESS;
-}
+}//TVMStatus VMDirectoryClose(int dirdescriptor)
 
 
 TVMStatus VMDirectoryRead(int dirdescriptor, SVMDirectoryEntryRef dirent)
@@ -723,7 +723,7 @@ TVMStatus VMDirectoryRead(int dirdescriptor, SVMDirectoryEntryRef dirent)
   MachineSuspendSignals(&sigs);
   MachineResumeSignals(&sigs);
   return VM_STATUS_SUCCESS;
-}
+}//TVMStatus VMDirectoryRead(int dirdescriptor, SVMDirectoryEntryRef dirent)
 
 
 TVMStatus VMDirectoryRewind(int dirdescriptor)
@@ -731,7 +731,7 @@ TVMStatus VMDirectoryRewind(int dirdescriptor)
   MachineSuspendSignals(&sigs);
   MachineResumeSignals(&sigs);
   return VM_STATUS_SUCCESS;
-}
+}//TVMStatus VMDirectoryRewind(int dirdescriptor)
 
 
 TVMStatus VMDirectoryCurrent(char *abspath)
@@ -739,7 +739,7 @@ TVMStatus VMDirectoryCurrent(char *abspath)
   MachineSuspendSignals(&sigs);
   MachineResumeSignals(&sigs);
   return VM_STATUS_SUCCESS;
-}
+}//TVMStatus VMDirectoryCurrent(char *abspath)
 
 
 TVMStatus VMDirectoryChange(const char *path)
@@ -747,8 +747,15 @@ TVMStatus VMDirectoryChange(const char *path)
   MachineSuspendSignals(&sigs);
   MachineResumeSignals(&sigs);
   return VM_STATUS_SUCCESS;
-}
+}//TVMStatus VMDirectoryChange(const char *path)
 
+
+TVMStatus VMDirectoryUnlink(const char *path)
+{
+  MachineSuspendSignals(&sigs);
+  MachineResumeSignals(&sigs);
+  return VM_STATUS_SUCCESS;
+}//TVMStatus VMDirectoryUnlink(const char *path)
 //***************************************************************************//
 //END FAT DIRECTORY FUNCTIONS                                                //
 //***************************************************************************//

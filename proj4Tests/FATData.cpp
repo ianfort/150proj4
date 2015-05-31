@@ -3,6 +3,8 @@
 #include <iostream>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <string>
+#include <cstring>
 
 
 using namespace std;
@@ -10,6 +12,9 @@ using namespace std;
 
 FATData::FATData(const char* mount)
 {
+  unsigned int imFileNameLen = strlen(mount);
+  imFileName = new char[imFileNameLen];
+  memcpy(imFileName, mount, imFileNameLen);
   BPB = new uint8_t[BPB_SIZE];
   unsigned int FATSz;
   unsigned int ROOTSz;
@@ -29,9 +34,9 @@ FATData::FATData(const char* mount)
   dataStart = firstRootSector + rootDirectorySectors;
   numClusters = (totalSectors32 - dataStart) / sectorsPerCluster;
 
-  FATSz = BPB_NUM_FATS * FATSz16 * 512;
+  FATSz = BPB_NUM_FATS * FATSz16 * bytesPerSector / 2; //divide by two because grabbing two bytes at a time
   ROOTSz = rootEntryCount * ROOT_ENT_SZ;
-  FAT = new uint8_t[FATSz];
+  FAT = new uint16_t[FATSz];
   ROOT = new uint8_t[ROOTSz];
 
   imageFile.seekg(bytesPerSector * reservedSectorCount);
@@ -53,30 +58,8 @@ FATData::~FATData()
   delete[] BPB;
   delete[] FAT;
   delete[] ROOT;
+  delete[] imFileName;
 }//FATData destructor
-
-
-/*
-typedef struct{
-    char DLongFileName[VM_FILE_SYSTEM_MAX_PATH];
-    char DShortFileName[VM_FILE_SYSTEM_SFN_SIZE];
-    unsigned int DSize;
-    unsigned char DAttributes;
-    SVMDateTime DCreate;
-    SVMDateTime DAccess;
-    SVMDateTime DModify;
-} SVMDirectoryEntry, *SVMDirectoryEntryRef;
-
-typedef struct{
-    unsigned int DYear;
-    unsigned char DMonth;
-    unsigned char DDay;
-    unsigned char DHour;
-    unsigned char DMinute;
-    unsigned char DSecond;
-    unsigned char DHundredth;
-} SVMDateTime, *SVMDateTimeRef;
-*/
 
 
 void FATData::addRootEntry(unsigned int offset)
@@ -85,6 +68,12 @@ void FATData::addRootEntry(unsigned int offset)
   fillDirEnt(&rootEnt, &ROOT[offset]);
   rootEnts->push_back(rootEnt);
 }//void FATData::addRootEntry(unsigned int offset)
+
+
+bool FATData::changeFileContents(uint16_t* fileStart)
+{
+  // Don't change the file name. Instead, follow FAT chain, overwriting data um
+}
 
 
 void FATData::fatls()
@@ -162,6 +151,98 @@ unsigned int FATData::getBytesPerSector()
 {
   return bytesPerSector;
 }//unsigned int FATData::getBytesPerSector()
+
+
+string FATData::getFileContents(string fName /* Short file name? */)
+{
+  uint16_t *FATPtr;
+  uint8_t dataOffset;
+  unsigned int clusterSize = bytesPerSector * sectorsPerCluster;
+  char *curDataCluster;
+  curDataCluster = new char[clusterSize];
+  unsigned int curDataSize;
+  string retStr;
+  
+  // TODO: Search vector of root entries for file with proper name, and get starting point.
+  // Store it in FATPtr and dataOffset.
+  
+  ifstream imageFile(imFileName, ios::in | ios::binary); // TODO: fstream method temporary. To be replaced by MachineFile function calls.
+  // Note: Maybe make a wrapper function to make it easier?
+  
+  while (true)
+  {
+    imageFile.seekg(dataStart + dataOffset);
+    imageFile.read(curDataCluster, clusterSize);
+    // TODO: Detect how much data is in cluster. Store in curDataSize
+    // curDataSize should equal clusterSize in all but the last cluster in the chain.
+    retStr.append(curDataCluster, curDataSize);
+    
+    if (!*FATPtr || *FATPtr == 0xfff8)
+    {
+      break;
+    }
+    
+    // Calculate new FATPtr location, and new data offset
+    dataOffset = *FATPtr * clusterSize;
+    FATPtr = &FAT[*FATPtr];
+  }
+  imageFile.close();
+  delete [] curDataCluster;
+  return retStr;
+}
+
+
+bool FATData::newFileContents(string fName)
+{
+}//bool FATData::newFileContents(string fName)
+
+
+bool FATData::setFileContents(string fName, string newContents)
+{
+  uint16_t *FATPtr = NULL;
+  uint16_t *nextFATPtr = NULL;
+  uint8_t dataOffset;
+  unsigned int clusterSize = bytesPerSector * sectorsPerCluster;
+  unsigned int newContentsOffset;
+  unsigned int i;
+
+  ofstream imageFile(imFileName, ios::out | ios::binary);
+  imageFile.seekp(dataStart);
+
+  if (/* TODO: filename not found in vector */ true ) //true so it compiles
+  {
+    for ( i = 1 ; i < FATSz16 ; i++ )
+    {
+      if (FAT[i] == 0)
+      {
+        FATPtr = &FAT[i];
+        break;
+      }
+    }
+  }
+  else
+  {
+    // TODO replace start entry
+  }
+
+  if (!FATPtr)
+  {
+    return false;
+  }
+
+  for ( ++i ; i < FATSz16 ; i++)
+  {
+    {
+      FATPtr = &FAT[i];
+      break;
+    }
+  }
+  
+  // TODO: Find first unallocated FAT entry and store it in FATPtr.
+  // TODO: Find next unallocated FAT entry and store it in nextFATPtr
+  // TODO: Modify value of FAT entry stored in FATPtr to point to nextFATPtr
+}
+
 
 //***************************************************************************//
 // Begin Utility Functions for FATData                                       //

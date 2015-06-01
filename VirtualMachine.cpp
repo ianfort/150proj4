@@ -789,6 +789,8 @@ TVMStatus VMDirectoryRead(int dirdescriptor, SVMDirectoryEntryRef dirent)
 TVMStatus VMDirectoryRewind(int dirdescriptor)
 {
   MachineSuspendSignals(&sigs);
+  Dir *dir = findDir(dirdescriptor);
+  dir->rewind();
   MachineResumeSignals(&sigs);
   return VM_STATUS_SUCCESS;
 }//TVMStatus VMDirectoryRewind(int dirdescriptor)

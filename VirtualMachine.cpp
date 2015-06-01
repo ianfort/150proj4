@@ -31,6 +31,7 @@ void* sharebase;
 TVMMemoryPoolID shareid, heapid;
 FATData* VMFAT;
 string curPath;
+Dir* dir;
 
 const TVMMemoryPoolID VM_MEMORY_POOL_ID_SYSTEM = 0;
 
@@ -40,6 +41,7 @@ int argc, char *argv[])
   TVMThreadID idletid;
   TVMMemorySize share = (sharedsize+0xFFF)&(~0xFFF);
   curPath = "/";
+  dir = NULL;
 
   TVMMainEntry mainFunc = VMLoadModule(argv[0]);
   if (!mainFunc)
@@ -713,7 +715,9 @@ TVMStatus VMDirectoryOpen(const char *dirname, int *dirdescriptor)
   }//if pointers are NULL
   //dirname is absolute path of directory
   //dirdescriptor: index of directory in data (0 for root)
-  Dir* newdir = new Dir(dirname, dirdescriptor, VMFAT);
+  if (dir)
+    delete dir;
+  dir = new Dir(dirname, dirdescriptor, VMFAT);
   MachineResumeSignals(&sigs);
   return VM_STATUS_SUCCESS;
 }//TVMStatus VMDirectoryOpen(const char *dirname, int *dirdescriptor)
@@ -722,6 +726,8 @@ TVMStatus VMDirectoryOpen(const char *dirname, int *dirdescriptor)
 TVMStatus VMDirectoryClose(int dirdescriptor)
 {
   MachineSuspendSignals(&sigs);
+  if (dir)
+    delete dir;
   MachineResumeSignals(&sigs);
   return VM_STATUS_SUCCESS;
 }//TVMStatus VMDirectoryClose(int dirdescriptor)

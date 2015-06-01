@@ -158,6 +158,32 @@ unsigned int FATData::getBytesPerSector()
 }//unsigned int FATData::getBytesPerSector()
 
 
+unsigned int FATData::getClusterSize()
+{
+  return (bytesPerSector * sectorsPerCluster);
+}//unsigned int FATData::getClusterSize()
+
+
+unsigned int FATData::getDataStartByte()
+{
+  return (dataStart * bytesPerSector);
+}//unsigned int FATData::getDataStartByte()
+
+
+unsigned int FATData::getFileStart(unsigned int pos)
+{
+  if (pos >= fileStarts->size() || pos < 0)
+    return 0;
+  return fileStarts->at(pos);
+}//unsigned int FATData::getFileStart(unsigned int pos)
+
+
+char* FATData::getImFileName()
+{
+  return imFileName;
+}//char* FATData::getImFileName()
+
+
 uint8_t* FATData::getROOT()
 {
   return ROOT;

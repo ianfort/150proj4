@@ -79,6 +79,10 @@ public:
   void fatout();
   void fatvol();
   unsigned int getBytesPerSector();
+  unsigned int getClusterSize();
+  unsigned int getDataStartByte();
+  unsigned int getFileStart(unsigned int pos);
+  char* getImFileName();
   uint8_t* getROOT();
   SVMDirectoryEntryRef getRootEnt(unsigned int pos);
   bool readFromFile(string fName, unsigned int length, string* ret);

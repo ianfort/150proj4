@@ -4,13 +4,24 @@
 Dir::Dir(const char *dirname, int *dirdescriptor, FATData* VMFAT)
 {
   dirent = new SVMDirectoryEntry;
+  pos = 0;
+  unsigned int loc;
+  char subdir[ROOT_ENT_SZ+1]; subdir[ROOT_ENT_SZ] = '\0';
   //go from dirname to pointer location -- currently doing no EC, so assuming the dir is always Root
-  if (!strcmp(dirname, ".") || !strcmp(dirname, "/") || !strcmp(dirname, "./"))
+  if (!strcmp(dirname, ".") || !strcmp(dirname, "/") || !strcmp(dirname, "./") || !strcmp(dirname, ""))
   {
     *dirdescriptor = dirdesc = DIR_ROOT_INDEX;
     fillDirEnt(dirent, VMFAT->getROOT());
   }//only works for root right now because not sure how to get pointer loc from dirname
-  pos = 0;
+  if (!strcmp(dirname, "/apps"))
+  {
+    loc = VMFAT->getDataStartByte() + (VMFAT->getFileStart(0) * VMFAT->getClusterSize());
+    ifstream imageFile(VMFAT->getImFileName(), ios::in | ios::binary);
+    imageFile.seekg(loc);
+    imageFile.read(subdir, ROOT_ENT_SZ);
+    fillDirEnt(dirent, (uint8_t*)subdir);
+//    cout << dirent->DShortFileName << endl;
+  }
 }//Dir Constructor
 
 

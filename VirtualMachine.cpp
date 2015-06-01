@@ -822,9 +822,22 @@ TVMStatus VMDirectoryChange(const char *path)
   {
     MachineResumeSignals(&sigs);
     return VM_STATUS_SUCCESS;
-  }
+  }//no attempt to change directory? All is well.
+  if (!strcmp(path, "..") && (curPath == "/"))
+  {
+    MachineResumeSignals(&sigs);
+    return VM_STATUS_FAILURE;
+  }//can't go up from root!
+  if (!strcmp(path, ".."))
+  {
+    curPath.erase(curPath.rfind('/'));
+    //actually change directory here?
+    MachineResumeSignals(&sigs);
+    return VM_STATUS_FAILURE;
+  }//can't go up from root!
+  curPath += path;
   MachineResumeSignals(&sigs);
-  return VM_STATUS_FAILURE;
+  return VM_STATUS_SUCCESS;
 }//TVMStatus VMDirectoryChange(const char *path)
 
 

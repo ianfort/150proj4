@@ -18,6 +18,12 @@ int Dir::getDirdesc()
   return dirdesc;
 }//int Dir::getDirdesc()
 
+
+SVMDirectoryEntryRef Dir::getDirent()
+{
+  return dirent;
+}
+
 //***************************************************************************//
 // Begin Utility Functions for Dir                                           //
 //***************************************************************************//

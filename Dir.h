@@ -17,6 +17,7 @@ class Dir
 public:
   Dir(const char *dirname, int *dirdescriptor, FATData* VMFAT);
   int getDirdesc();
+  SVMDirectoryEntryRef getDirent();
 };
 
 void fillDate(SVMDateTimeRef dt, uint8_t date[2]);

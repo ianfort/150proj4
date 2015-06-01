@@ -245,14 +245,23 @@ TVMStatus VMFileRead(int filedescriptor, void *data, int *length)
   }
   else
   {
-    string readStr = VMFAT.
+    string readStr;
+    if ( !VMFAT->readFromFile( findDir(filedescriptor)->getDirent()->DShortFileName, *length, &readStr ) )
+    {
+      MachineResumeSignals(&sigs);
+      return VM_STATUS_FAILURE;
+    }
+    strcpy(retval, readStr.c_str());
+    tr->setcd(readStr.length());
   }
-  *length = tr->getcd();
+
   if (tr->getcd() < 0)
   {
     MachineResumeSignals(&sigs);
     return VM_STATUS_FAILURE;
   }//if the calldata was invalid
+
+  *length = tr->getcd();
   strcpy((char*)data, retval);
   delete[] retval;
   MachineResumeSignals(&sigs);

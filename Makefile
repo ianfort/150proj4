@@ -17,6 +17,7 @@ OBJS=$(OBJDIR)/Machine.o \
      $(OBJDIR)/VirtualMachine.o \
      $(OBJDIR)/Thread.o \
      $(OBJDIR)/Tibia.o \
+     $(OBJDIR)/Dir.o \
      $(OBJDIR)/Mutex.o \
      $(OBJDIR)/MPCB.o \
      $(OBJDIR)/MemBlock.o \

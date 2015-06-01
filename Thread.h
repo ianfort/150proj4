@@ -16,8 +16,6 @@
 
 using namespace std;
 
-// extern "C"
-// {
 
 #define NUM_RQS                                 4
 #define VM_THREAD_PRIORITY_NIL                  ((TVMThreadPriority)0x00)
@@ -68,9 +66,6 @@ public:
   void setTicks(volatile int newticks);
   void stopWaiting();
 };
-
-
-// }
 
 
 #endif

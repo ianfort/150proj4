@@ -5,6 +5,8 @@
 #include "FATData.h"
 #include <algorithm>
 
+#define DIR_ROOT_INDEX 0
+
 
 using namespace std;
 
@@ -696,18 +698,24 @@ TVMStatus VMMemoryPoolQuery(TVMMemoryPoolID memory, TVMMemorySizeRef bytesleft)
   MachineResumeSignals(&sigs);
   return VM_STATUS_SUCCESS;
 }
-
-
 //***************************************************************************//
 // END MEMORY POOL FUNCTIONS                                                 //
 //***************************************************************************//
 //***************************************************************************//
 // START FAT DIRECTORY FUNCTIONS                                             //
 //***************************************************************************//
-
 TVMStatus VMDirectoryOpen(const char *dirname, int *dirdescriptor)
 {
   MachineSuspendSignals(&sigs);
+  if (!dirname || !dirdescriptor)
+  {
+    MachineResumeSignals(&sigs);
+    return VM_STATUS_ERROR_INVALID_PARAMETER;
+  }//if pointers are NULL
+  //dirname is absolute path of directory
+  //dirdescriptor: index of directory in data (0 for root)
+  if (!strcmp(dirname, ".") || !strcmp(dirname, "/") || !strcmp(dirname, "./"))
+    *dirdescriptor = DIR_ROOT_INDEX;
   MachineResumeSignals(&sigs);
   return VM_STATUS_SUCCESS;
 }//TVMStatus VMDirectoryOpen(const char *dirname, int *dirdescriptor)
@@ -754,8 +762,13 @@ TVMStatus VMDirectoryCurrent(char *abspath)
 TVMStatus VMDirectoryChange(const char *path)
 {
   MachineSuspendSignals(&sigs);
+  if (!strcmp(path, ".") || !strcmp(path, "/") || !strcmp(path, "./"))
+  {
+    MachineResumeSignals(&sigs);
+    return VM_STATUS_SUCCESS;
+  }
   MachineResumeSignals(&sigs);
-  return VM_STATUS_SUCCESS;
+  return VM_STATUS_FAILURE;
 }//TVMStatus VMDirectoryChange(const char *path)
 
 

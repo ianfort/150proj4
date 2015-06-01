@@ -38,7 +38,7 @@
 #define DIRENT_FILESIZE_SZ 4
 #define DIRENT_ATTR_OFFSET 11
 #define DIRENT_ATTR_SZ 1
-#define ATTR_LONG_NAME (0x01 | 0x02 | 0x04 | 0x08 | 0x10 | 0x20)
+#define ATTR_LONG_NAME (0x01 | 0x02 | 0x04 | 0x08)
 #define LO 0
 #define HI 1
 #define FAT_CHAIN_END 0xfff8
@@ -48,20 +48,10 @@
 #include <cstring>
 #include <vector>
 #include <string>
+#include "Dir.h"
 
 using namespace std;
 
-/*
-typedef struct{
-    char DLongFileName[VM_FILE_SYSTEM_MAX_PATH];
-    char DShortFileName[VM_FILE_SYSTEM_SFN_SIZE];
-    unsigned int DSize;
-    unsigned char DAttributes;
-    SVMDateTime DCreate;
-    SVMDateTime DAccess;
-    SVMDateTime DModify;
-} SVMDirectoryEntry, *SVMDirectoryEntryRef;
-*/
 
 class FATData
 {
@@ -89,14 +79,12 @@ public:
   void fatout();
   void fatvol();
   unsigned int getBytesPerSector();
+  uint8_t* getROOT();
   bool readFromFile(string fName, unsigned int length, string* ret);
   bool writeToFile(string fName, string newContents);
 };
 
 unsigned int bytesToUnsigned(uint8_t* start, unsigned int size);
-void fillDate(SVMDateTimeRef dt, uint8_t date[2]);
-void fillDirEnt(SVMDirectoryEntryRef dir, uint8_t* loc);
-void fillTime(SVMDateTimeRef dt, uint8_t time[2], unsigned char dh = 0);
 string convertFNameToShort(string toConvert);
 
 #endif

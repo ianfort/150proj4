@@ -182,6 +182,7 @@ bool FATData::readFromFile(string fName, unsigned int length, string* ret)
   for ( vector<SVMDirectoryEntry>::iterator entItr = rootEnts->begin() ;
         entItr != rootEnts->end() ; entItr++) 
   {
+    cout << "'" << (*entItr).DShortFileName << "' : '" << shortFName << "'\n";
     if ( shortFName == string((*entItr).DShortFileName) )
     {
       FATOffset = fileStarts->at(entItr - rootEnts->begin());

@@ -9,9 +9,6 @@
 #include <cctype>
 
 
-using namespace std;
-
-
 FATData::FATData(const char* mount)
 {
   unsigned int imFileNameLen = strlen(mount);
@@ -70,9 +67,11 @@ void FATData::addRootEntry(unsigned int offset)
 {
   SVMDirectoryEntry rootEnt;
   fillDirEnt(&rootEnt, &ROOT[offset]);
-  rootEnts->push_back(rootEnt);
-
-  fileStarts->push_back( bytesToUnsigned(&ROOT[offset + 26], 2) );
+  if ((ROOT[offset] != char(0xE5)) && (ROOT[offset] != char(0x00)) && ((ROOT[offset + DIRENT_ATTR_OFFSET] & ATTR_LONG_NAME) != ATTR_LONG_NAME))
+  {
+    rootEnts->push_back(rootEnt);
+    fileStarts->push_back( bytesToUnsigned(&ROOT[offset + 26], 2) );
+  }//0xE5: free; 0x00: free, no more dirents after this one; don't add it if it's a longname instead of an actual dirent
 }//void FATData::addRootEntry(unsigned int offset)
 
 
@@ -159,6 +158,12 @@ unsigned int FATData::getBytesPerSector()
 }//unsigned int FATData::getBytesPerSector()
 
 
+uint8_t* FATData::getROOT()
+{
+  return ROOT;
+}//uint8_t* FATData::getROOT()
+
+
 bool FATData::readFromFile(string fName, unsigned int length, string* ret)
 {
   bool success = false;
@@ -177,7 +182,7 @@ bool FATData::readFromFile(string fName, unsigned int length, string* ret)
   for ( vector<SVMDirectoryEntry>::iterator entItr = rootEnts->begin() ;
         entItr != rootEnts->end() ; entItr++) 
   {
-    cout << (*entItr).DShortFileName << " : " << shortFName << endl;
+    cout << "'" << (*entItr).DShortFileName << "' : '" << shortFName << "'\n";
     if ( shortFName == string((*entItr).DShortFileName) )
     {
       FATOffset = fileStarts->at(entItr - rootEnts->begin());
@@ -190,7 +195,6 @@ bool FATData::readFromFile(string fName, unsigned int length, string* ret)
 
   if (!success)
   {
-    cout << "Hello1\n";
     return false;
   }
   
@@ -211,7 +215,6 @@ bool FATData::readFromFile(string fName, unsigned int length, string* ret)
 
     if (!FAT[FATOffset])
     {
-      cout << "Hello2\n";
       return false;
     }
     if (FAT[FATOffset] == FAT_CHAIN_END)
@@ -237,6 +240,22 @@ bool FATData::newFileContents(string fName)
 }//bool FATData::newFileContents(string fName)
 */
 
+
+bool FATData::writeToFile(string fName, string newContents)
+{
+/*
+  unsigned int FATOffset;
+  unsigned int nextFATOffset;
+  uint8_t dataOffset;
+  unsigned int clusterSize = bytesPerSector * sectorsPerCluster;
+  unsigned int newContentsOffset;
+  unsigned int i;
+*/
+  return true;
+
+}
+
+/*
 bool FATData::writeToFile(string fName, string newContents)
 {
   uint16_t *FATPtr = NULL;
@@ -249,7 +268,7 @@ bool FATData::writeToFile(string fName, string newContents)
   ofstream imageFile(imFileName, ios::out | ios::binary);
   imageFile.seekp(dataStart);
 
-  if ( true /* TODO: if filename not found in vector */)
+  if ( true ) // TODO: if filename not found in vector
   {
     for ( i = 1 ; i < FATSz16 ; i++ )
     {
@@ -282,6 +301,10 @@ bool FATData::writeToFile(string fName, string newContents)
   // TODO: Find next unallocated FAT entry and store it in nextFATPtr
   // TODO: Modify value of FAT entry stored in FATPtr to point to nextFATPtr
 }
+*/
+
+
+
 
 
 //***************************************************************************//
@@ -296,47 +319,6 @@ unsigned int bytesToUnsigned(uint8_t* start, unsigned int size)
   }
   return accum;
 }//unsigned int bytesToUnsigned(uint8_t* start, size)
-
-
-void fillDate(SVMDateTimeRef dt, uint8_t date[2])
-{
-  dt->DYear = 1980 + (((date[HI]) >> 1) & 255); //0000 0000 1111 1110
-  dt->DMonth = ((date[HI] & 1) << 1) + ((date[LO] >> 5) & 7); //1110 0000 0000 0001
-  dt->DDay = date[LO] & 31; //0001 1111 0000 0000
-}//void fillDate(SVMDateTimeRef dt, uint8_t date[2])
-
-
-void fillDirEnt(SVMDirectoryEntryRef dir, uint8_t* loc)
-{
-  uint8_t empty[2] = {0, 0};
-//  dir->DLongFileName; //TODO
-  //13 chars: 8 chars of filename, 1 for '.', 3 for file extension, 1 for '\0' terminating char
-  memcpy(dir->DShortFileName, loc+DIRENT_NAME_OFFSET, 8);
-  dir->DShortFileName[8] = '.';
-  memcpy((dir->DShortFileName)+9, loc+DIRENT_NAME_OFFSET+8, 3);
-  dir->DSize = *(loc + DIRENT_FILESIZE_OFFSET);
-  dir->DAttributes = *(loc + DIRENT_ATTR_OFFSET);
-  fillDate(&(dir->DCreate), (loc+DIRENT_CRT_DATE_OFFSET));
-  fillTime(&(dir->DCreate), (loc+DIRENT_CRT_TIME_OFFSET), *(loc+DIRENT_CRT_TIME_CS_OFFSET));
-  fillDate(&(dir->DAccess), (loc+DIRENT_ACC_DATE_OFFSET));
-  fillTime(&(dir->DAccess), empty);
-  fillDate(&(dir->DModify), (loc+DIRENT_WRT_DATE_OFFSET));
-  fillTime(&(dir->DModify), (loc+DIRENT_WRT_TIME_OFFSET));
-}//void fillDirEnt(SVMDirectoryEntryRef dir, uint8_t* loc)
-
-
-void fillTime(SVMDateTimeRef dt, uint8_t time[2], unsigned char dh)
-{
-  dt->DHour = ((time[HI] >> 3) & 31); //0000 0000 1111 1000
-  dt->DMinute = ((time[HI] & 7) << 3) + ((time[LO] >> 5) & 7);; //1110 0000 0000 0111
-  dt->DSecond = 2 * (time[LO] & 31); //0001 1111 0000 0000, 2-sec count
-  dt->DHundredth = dh;
-  if (dh >= 100)
-  {
-    dt->DSecond += 1;
-    dt->DHundredth -= 100;
-  }//if there's between one and two hundredths of an extra second, it's a full extra second
-}//void fillTime(SVMDateTimeRef dt, uint8_t time[2], unsigned char dh)
 
 
 string convertFNameToShort(string toConvert)
@@ -368,3 +350,4 @@ string convertFNameToShort(string toConvert)
   if containsDot
 */
 }
+

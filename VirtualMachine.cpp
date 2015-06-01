@@ -18,6 +18,7 @@ void skeleton(void* tibia);
 void idle(void*);
 Mutex* findMutex(TVMMutexID id);
 MPCB* findMemPool(TVMMemoryPoolID id);
+Dir* findDir(int dirdescriptor);
 
 vector<Thread*> *threads;
 Thread *tr, *mainThread, *pt;
@@ -733,12 +734,16 @@ TVMStatus VMDirectoryOpen(const char *dirname, int *dirdescriptor)
 TVMStatus VMDirectoryClose(int dirdescriptor)
 {
   MachineSuspendSignals(&sigs);
-  Dir *dir;
+  Dir *dir = findDir(dirdescriptor);
+  if (!dir)
+  {
+    MachineResumeSignals(&sigs);
+    return VM_STATUS_FAILURE;
+  }//fail on dir not found
   for (vector<Dir*>::iterator itr = dirs->begin(); itr != dirs->end(); itr++)
   {
     if ((*itr)->getDirdesc() == dirdescriptor)
     {
-      dir = *itr;
       dirs->erase(itr);
       delete dir;
       break;
@@ -752,6 +757,7 @@ TVMStatus VMDirectoryClose(int dirdescriptor)
 TVMStatus VMDirectoryRead(int dirdescriptor, SVMDirectoryEntryRef dirent)
 {
   MachineSuspendSignals(&sigs);
+  Dir *dir = findDir(dirdescriptor);
   MachineResumeSignals(&sigs);
   return VM_STATUS_SUCCESS;
 }//TVMStatus VMDirectoryRead(int dirdescriptor, SVMDirectoryEntryRef dirent)
@@ -908,6 +914,18 @@ MPCB* findMemPool(TVMMemoryPoolID id)
   return NULL;
 }//MPCB* findMemPool(TVMMemoryPoolID id)
 
+
+Dir* findDir(int dirdescriptor)
+{
+  for (vector<Dir*>::iterator itr = dirs->begin() ; itr != dirs->end() ; itr++)
+  {
+    if ( (*itr)->getDirdesc() == dirdescriptor )
+    {
+      return *itr;
+    }
+  }
+  return NULL;
+}//Dir* findDir(int dirdescriptor)
 
 //***************************************************************************//
 // END UTILITY FUNCTIONS                                                     //

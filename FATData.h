@@ -77,14 +77,12 @@ public:
   void fatout();
   void fatvol();
   unsigned int getBytesPerSector();
+  uint8_t* getROOT();
   bool readFromFile(string fName, unsigned int length, string* ret);
   bool writeToFile(string fName, string newContents);
 };
 
 unsigned int bytesToUnsigned(uint8_t* start, unsigned int size);
-void fillDate(SVMDateTimeRef dt, uint8_t date[2]);
-void fillDirEnt(SVMDirectoryEntryRef dir, uint8_t* loc);
-void fillTime(SVMDateTimeRef dt, uint8_t time[2], unsigned char dh = 0);
 string convertFNameToShort(string toConvert);
 
 #endif

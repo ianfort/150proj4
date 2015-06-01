@@ -229,15 +229,23 @@ TVMStatus VMFileRead(int filedescriptor, void *data, int *length)
     MachineSuspendSignals(&sigs);
     scheduler();//try to allocate until it works
   }
-  for (int i = 0; lenleft >= 0 ; i++, lenleft -= 512)
+
+  if ( filedescriptor < 3 )
   {
-    MachineFileRead(filedescriptor, readloc, min(lenleft, 512), fileCallback, (void*)tr);
-    tr->setState(VM_THREAD_STATE_WAITING);
-    scheduler();
-    bytesread += tr->getcd();
-    memcpy(&retval[i*512], readloc, min(lenleft, 512));
+    for (int i = 0; lenleft >= 0 ; i++, lenleft -= 512)
+    {
+      MachineFileRead(filedescriptor, readloc, min(lenleft, 512), fileCallback, (void*)tr);
+      tr->setState(VM_THREAD_STATE_WAITING);
+      scheduler();
+      bytesread += tr->getcd();
+      memcpy(&retval[i*512], readloc, min(lenleft, 512));
+    }
+    tr->setcd(bytesread);
   }
-  tr->setcd(bytesread);
+  else
+  {
+    string readStr = VMFAT.
+  }
   *length = tr->getcd();
   if (tr->getcd() < 0)
   {

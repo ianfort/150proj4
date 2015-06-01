@@ -242,16 +242,17 @@ bool FATData::newFileContents(string fName)
 
 bool FATData::writeToFile(string fName, string newContents)
 {
-/*
+
   unsigned int FATOffset;
   unsigned int nextFATOffset;
   uint8_t dataOffset;
   unsigned int clusterSize = bytesPerSector * sectorsPerCluster;
   unsigned int newContentsOffset;
   unsigned int i;
-*/
-  return true;
 
+  
+
+  return true;
 }
 
 /*

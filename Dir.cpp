@@ -3,20 +3,39 @@
 
 Dir::Dir(const char *dirname, int *dirdescriptor, FATData* VMFAT)
 {
+  dirent = new SVMDirectoryEntry;
   //go from dirname to pointer location -- currently doing no EC, so assuming the dir is always Root
   if (!strcmp(dirname, ".") || !strcmp(dirname, "/") || !strcmp(dirname, "./"))
   {
     *dirdescriptor = dirdesc = DIR_ROOT_INDEX;
     fillDirEnt(dirent, VMFAT->getROOT());
   }//only works for root right now because not sure how to get pointer loc from dirname
-
+  pos = 0;
 }//Dir Constructor
+
+
+Dir::~Dir()
+{
+  delete dirent;
+}//Dir::~Dir()
 
 
 int Dir::getDirdesc()
 {
   return dirdesc;
 }//int Dir::getDirdesc()
+
+
+int Dir::getPos()
+{
+  return pos;
+}//int Dir::getPos()
+
+
+void Dir::incPos()
+{
+  pos++;
+}//void Dir::incPos()
 
 
 SVMDirectoryEntryRef Dir::getDirent()

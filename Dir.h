@@ -14,9 +14,13 @@ class Dir
 {
   SVMDirectoryEntryRef dirent;
   int dirdesc;
+  unsigned int pos;
 public:
   Dir(const char *dirname, int *dirdescriptor, FATData* VMFAT);
+  ~Dir();
   int getDirdesc();
+  int getPos();
+  void incPos();
   SVMDirectoryEntryRef getDirent();
 };
 

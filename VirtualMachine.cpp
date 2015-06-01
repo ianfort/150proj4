@@ -107,7 +107,10 @@ TVMStatus VMFileOpen(const char *filename, int flags, int mode, int *filedescrip
 {
   MachineSuspendSignals(&sigs);
 
-  string slashfilename = string("/") + string(filename);
+  char absolute[200];
+  string slashfilename = curPath + string(filename);
+  
+  VMFileSystemGetAbsolutePath(*absolute, const char *curpath, (string("./") + string(filename)) )
 
   tr->setcd(-18); //impossible to have a negative file descriptor
   if (filename == NULL || filedescriptor == NULL)
@@ -118,7 +121,7 @@ TVMStatus VMFileOpen(const char *filename, int flags, int mode, int *filedescrip
   MachineFileOpen(slashfilename.c_str(), flags, mode, fileCallback, (void*)tr);
   tr->setState(VM_THREAD_STATE_WAITING);
   scheduler();
-  cout << "AAAAAAAAAHHHHHH!!!! " << tr->getcd() << endl;
+  cout << slashfilename << " AAAAAAAAAHHHHHH!!!! " << tr->getcd() << endl;
   if(tr->getcd() < 0)
   {
     MachineResumeSignals(&sigs);

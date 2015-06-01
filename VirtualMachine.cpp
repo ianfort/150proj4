@@ -106,15 +106,22 @@ int argc, char *argv[])
 TVMStatus VMFileOpen(const char *filename, int flags, int mode, int *filedescriptor)
 {
   MachineSuspendSignals(&sigs);
+
+  char absolute[200];
+  string slashfilename = curPath + string(filename);
+  
+  VMFileSystemGetAbsolutePath(*absolute, const char *curpath, (string("./") + string(filename)) )
+
   tr->setcd(-18); //impossible to have a negative file descriptor
   if (filename == NULL || filedescriptor == NULL)
   {
     MachineResumeSignals(&sigs);
     return VM_STATUS_ERROR_INVALID_PARAMETER;
   }//need to have a filename and a place to put the FD
-  MachineFileOpen(filename, flags, mode, fileCallback, (void*)tr);
+  MachineFileOpen(slashfilename.c_str(), flags, mode, fileCallback, (void*)tr);
   tr->setState(VM_THREAD_STATE_WAITING);
   scheduler();
+  cout << slashfilename << " AAAAAAAAAHHHHHH!!!! " << tr->getcd() << endl;
   if(tr->getcd() < 0)
   {
     MachineResumeSignals(&sigs);

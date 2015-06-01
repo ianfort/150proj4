@@ -164,6 +164,14 @@ uint8_t* FATData::getROOT()
 }//uint8_t* FATData::getROOT()
 
 
+SVMDirectoryEntryRef FATData::getRootEnt(unsigned int pos)
+{
+  if (pos >= rootEnts->size() || pos < 0)
+    return NULL;
+  return &(rootEnts->at(pos));
+}//SVMDirectoryEntryRef FATData::getRootEnt(int pos)
+
+
 bool FATData::readFromFile(string fName, unsigned int length, string* ret)
 {
   bool success = false;
@@ -181,7 +189,7 @@ bool FATData::readFromFile(string fName, unsigned int length, string* ret)
   for ( vector<SVMDirectoryEntry>::iterator entItr = rootEnts->begin() ;
         entItr != rootEnts->end() ; entItr++) 
   {
-    // cout << "'" << (*entItr).DShortFileName << "' : '" << shortFName << "'\n";
+    cout << "'" << (*entItr).DShortFileName << "' : '" << shortFName << "'\n";
     if ( shortFName == string((*entItr).DShortFileName) )
     {
       FATOffset = fileStarts->at(entItr - rootEnts->begin());
@@ -249,9 +257,24 @@ bool FATData::writeToFile(string fName, string newContents)
   unsigned int clusterSize = bytesPerSector * sectorsPerCluster;
   unsigned int newContentsOffset;
   unsigned int i;
-*/
-  return true;
 
+  for ( vector<SVMDirectoryEntry>::iterator entItr = rootEnts->begin() ;
+        entItr != rootEnts->end() ; entItr++) 
+  {
+    // cout << "'" << (*entItr).DShortFileName << "' : '" << shortFName << "'\n";
+    if ( shortFName == string((*entItr).DShortFileName) )
+    {
+      FATOffset = fileStarts->at(entItr - rootEnts->begin());
+      dataOffset = FATOffset * clusterSize;
+      // lenleft = min((*entItr).DSize * bytesPerSector * sectorsPerCluster, length);
+      success = true;
+      break;
+    }
+  }
+
+*/
+
+  return true;
 }
 
 /*

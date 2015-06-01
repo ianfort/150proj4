@@ -276,7 +276,7 @@ bool FATData::newFileContents(string fName)
 
 bool FATData::writeToFile(string fName, string newContents)
 {
-
+/*
   unsigned int FATOffset;
   unsigned int nextFATOffset;
   uint8_t dataOffset;
@@ -284,7 +284,21 @@ bool FATData::writeToFile(string fName, string newContents)
   unsigned int newContentsOffset;
   unsigned int i;
 
-  
+  for ( vector<SVMDirectoryEntry>::iterator entItr = rootEnts->begin() ;
+        entItr != rootEnts->end() ; entItr++) 
+  {
+    // cout << "'" << (*entItr).DShortFileName << "' : '" << shortFName << "'\n";
+    if ( shortFName == string((*entItr).DShortFileName) )
+    {
+      FATOffset = fileStarts->at(entItr - rootEnts->begin());
+      dataOffset = FATOffset * clusterSize;
+      // lenleft = min((*entItr).DSize * bytesPerSector * sectorsPerCluster, length);
+      success = true;
+      break;
+    }
+  }
+
+*/
 
   return true;
 }

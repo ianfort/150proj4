@@ -47,6 +47,7 @@
 #include <cstring>
 #include <vector>
 #include <string>
+#include "Dir.h"
 
 using namespace std;
 

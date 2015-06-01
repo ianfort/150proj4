@@ -31,7 +31,7 @@ void fillDirEnt(SVMDirectoryEntryRef dir, uint8_t* loc)
   memcpy(dir->DShortFileName, loc+DIRENT_NAME_OFFSET, 8);
   dir->DShortFileName[8] = '.';
   memcpy((dir->DShortFileName)+9, loc+DIRENT_NAME_OFFSET+8, 3);
-  dir->DShortFileName[VM_FILE_SYSTEM_SFN_SIZE] = '\0';
+  dir->DShortFileName[VM_FILE_SYSTEM_SFN_SIZE-1] = '\0';
   dir->DSize = *(loc + DIRENT_FILESIZE_OFFSET);
   dir->DAttributes = *(loc + DIRENT_ATTR_OFFSET);
   fillDate(&(dir->DCreate), (loc+DIRENT_CRT_DATE_OFFSET));

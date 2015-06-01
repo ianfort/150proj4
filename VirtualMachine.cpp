@@ -3,6 +3,7 @@
 #include "Mutex.h"
 #include "MPCB.h"
 #include "FATData.h"
+#include "Dir.h"
 #include <algorithm>
 
 
@@ -712,7 +713,7 @@ TVMStatus VMDirectoryOpen(const char *dirname, int *dirdescriptor)
   }//if pointers are NULL
   //dirname is absolute path of directory
   //dirdescriptor: index of directory in data (0 for root)
-  Dir newdir = new Dir(dirname, dirdescriptor, VMFAT);
+  Dir* newdir = new Dir(dirname, dirdescriptor, VMFAT);
   MachineResumeSignals(&sigs);
   return VM_STATUS_SUCCESS;
 }//TVMStatus VMDirectoryOpen(const char *dirname, int *dirdescriptor)

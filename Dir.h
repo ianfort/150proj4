@@ -2,12 +2,13 @@
 #define DIR_H
 
 #include "VirtualMachine.h"
-#include "FatData.h"
+#include "FATData.h"
 
 #define DIR_ROOT_INDEX 0
 
 using namespace std;
 
+class FATData;
 
 class Dir
 {

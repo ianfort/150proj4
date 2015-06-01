@@ -65,7 +65,7 @@ void FATData::addRootEntry(unsigned int offset)
 {
   SVMDirectoryEntry rootEnt;
   fillDirEnt(&rootEnt, &ROOT[offset]);
-  if ((ROOT[offset] != '0xE5') && (ROOT[offset] != '0x00') && ((ROOT[offset + DIRENT_ATTR_OFFSET] & ATTR_LONG_NAME) != ATTR_LONG_NAME))
+  if ((ROOT[offset] != char(0xE5)) && (ROOT[offset] != char(0x00)) && ((ROOT[offset + DIRENT_ATTR_OFFSET] & ATTR_LONG_NAME) != ATTR_LONG_NAME))
   {
     rootEnts->push_back(rootEnt);
     fileStarts->push_back( bytesToUnsigned(&ROOT[offset + 26], 2) );

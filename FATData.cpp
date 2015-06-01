@@ -9,9 +9,6 @@
 #include <cctype>
 
 
-using namespace std;
-
-
 FATData::FATData(const char* mount)
 {
   unsigned int imFileNameLen = strlen(mount);

@@ -107,10 +107,21 @@ TVMStatus VMFileOpen(const char *filename, int flags, int mode, int *filedescrip
 {
   MachineSuspendSignals(&sigs);
 
-  char absolute[200];
-  string slashfilename = curPath + string(filename);
-  
-  VMFileSystemGetAbsolutePath(*absolute, const char *curpath, (string("./") + string(filename)) )
+//  char absolute[200];
+  string slashfilename;
+  if (curPath == "/")
+    slashfilename = curPath + string(filename);
+  else
+    slashfilename = curPath + "/" + string(filename);
+  for (string::iterator itr = slashfilename.begin(); itr != slashfilename.end(); itr++)
+  {
+    if (*itr == ' ')
+    {
+      slashfilename.erase(itr);
+      itr--;
+    }
+  }
+//  VMFileSystemGetAbsolutePath(absolute, curPath.c_str(), (string("./") + string(filename)).c_str() );
 
   tr->setcd(-18); //impossible to have a negative file descriptor
   if (filename == NULL || filedescriptor == NULL)

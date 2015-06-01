@@ -115,6 +115,7 @@ TVMStatus VMFileOpen(const char *filename, int flags, int mode, int *filedescrip
   MachineFileOpen(filename, flags, mode, fileCallback, (void*)tr);
   tr->setState(VM_THREAD_STATE_WAITING);
   scheduler();
+  cout << "AAAAAAAAAHHHHHH!!!! " << tr->getcd() << endl;
   if(tr->getcd() < 0)
   {
     MachineResumeSignals(&sigs);

@@ -31,7 +31,7 @@ void* sharebase;
 TVMMemoryPoolID shareid, heapid;
 FATData* VMFAT;
 string curPath;
-Dir* dir;
+vector<Dir*> *dirs;
 
 const TVMMemoryPoolID VM_MEMORY_POOL_ID_SYSTEM = 0;
 
@@ -41,7 +41,6 @@ int argc, char *argv[])
   TVMThreadID idletid;
   TVMMemorySize share = (sharedsize+0xFFF)&(~0xFFF);
   curPath = "/";
-  dir = NULL;
 
   TVMMainEntry mainFunc = VMLoadModule(argv[0]);
   if (!mainFunc)
@@ -62,6 +61,7 @@ int argc, char *argv[])
   VMMemoryPoolCreate(heap, heapsize, &heapid);
 
   VMFAT = new FATData(mount);
+  dirs = new vector<Dir*>;
 
   mainThread = new Thread;
   mainThread->setPriority(VM_THREAD_PRIORITY_NORMAL);
@@ -715,9 +715,8 @@ TVMStatus VMDirectoryOpen(const char *dirname, int *dirdescriptor)
   }//if pointers are NULL
   //dirname is absolute path of directory
   //dirdescriptor: index of directory in data (0 for root)
-  if (dir)
-    delete dir;
-  dir = new Dir(dirname, dirdescriptor, VMFAT);
+  Dir *dir = new Dir(dirname, dirdescriptor, VMFAT);
+  dirs->push_back(dir);
   MachineResumeSignals(&sigs);
   return VM_STATUS_SUCCESS;
 }//TVMStatus VMDirectoryOpen(const char *dirname, int *dirdescriptor)
@@ -726,8 +725,17 @@ TVMStatus VMDirectoryOpen(const char *dirname, int *dirdescriptor)
 TVMStatus VMDirectoryClose(int dirdescriptor)
 {
   MachineSuspendSignals(&sigs);
-  if (dir)
-    delete dir;
+  Dir *dir;
+  for (vector<Dir*>::iterator itr = dirs->begin(); itr != dirs->end(); itr++)
+  {
+    if ((*itr)->getDirdesc() == dirdescriptor)
+    {
+      dir = *itr;
+      dirs->erase(itr);
+      delete dir;
+      break;
+    }
+  }
   MachineResumeSignals(&sigs);
   return VM_STATUS_SUCCESS;
 }//TVMStatus VMDirectoryClose(int dirdescriptor)

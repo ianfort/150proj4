@@ -6,11 +6,17 @@ Dir::Dir(const char *dirname, int *dirdescriptor, FATData* VMFAT)
   //go from dirname to pointer location -- currently doing no EC, so assuming the dir is always Root
   if (!strcmp(dirname, ".") || !strcmp(dirname, "/") || !strcmp(dirname, "./"))
   {
-    *dirdescriptor = DIR_ROOT_INDEX;
+    *dirdescriptor = dirdesc = DIR_ROOT_INDEX;
     fillDirEnt(dirent, VMFAT->getROOT());
   }//only works for root right now because not sure how to get pointer loc from dirname
 
 }//Dir Constructor
+
+
+int Dir::getDirdesc()
+{
+  return dirdesc;
+}//int Dir::getDirdesc()
 
 //***************************************************************************//
 // Begin Utility Functions for Dir                                           //

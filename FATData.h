@@ -38,7 +38,7 @@
 #define DIRENT_FILESIZE_SZ 4
 #define DIRENT_ATTR_OFFSET 11
 #define DIRENT_ATTR_SZ 1
-#define ATTR_LONG_NAME (0x01 | 0x02 | 0x04 | 0x08 | 0x10 | 0x20)
+#define ATTR_LONG_NAME (0x01 | 0x02 | 0x04 | 0x08)
 #define LO 0
 #define HI 1
 

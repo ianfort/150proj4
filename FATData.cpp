@@ -239,6 +239,22 @@ bool FATData::newFileContents(string fName)
 }//bool FATData::newFileContents(string fName)
 */
 
+
+bool FATData::writeToFile(string fName, string newContents)
+{
+/*
+  unsigned int FATOffset;
+  unsigned int nextFATOffset;
+  uint8_t dataOffset;
+  unsigned int clusterSize = bytesPerSector * sectorsPerCluster;
+  unsigned int newContentsOffset;
+  unsigned int i;
+*/
+  return true;
+
+}
+
+/*
 bool FATData::writeToFile(string fName, string newContents)
 {
   uint16_t *FATPtr = NULL;
@@ -251,7 +267,7 @@ bool FATData::writeToFile(string fName, string newContents)
   ofstream imageFile(imFileName, ios::out | ios::binary);
   imageFile.seekp(dataStart);
 
-  if ( true /* TODO: if filename not found in vector */)
+  if ( true ) // TODO: if filename not found in vector
   {
     for ( i = 1 ; i < FATSz16 ; i++ )
     {
@@ -284,6 +300,10 @@ bool FATData::writeToFile(string fName, string newContents)
   // TODO: Find next unallocated FAT entry and store it in nextFATPtr
   // TODO: Modify value of FAT entry stored in FATPtr to point to nextFATPtr
 }
+*/
+
+
+
 
 
 //***************************************************************************//
@@ -329,3 +349,4 @@ string convertFNameToShort(string toConvert)
   if containsDot
 */
 }
+

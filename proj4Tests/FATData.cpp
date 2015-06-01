@@ -172,9 +172,8 @@ bool FATData::readFromFile(string fName, unsigned int length, string* ret)
   unsigned int clusterSize = bytesPerSector * sectorsPerCluster;
   char *curDataCluster;
   curDataCluster = new char[clusterSize];
-  unsigned int curDataSize;
   string retStr;
-  unsigned int l;
+  unsigned int lenleft;//remaining length in characters (bytes)
   string shortFName = fName; //convertFNameToShort(fName);
 
   // Search vector of root entries for file with proper name, and get starting point.
@@ -182,12 +181,12 @@ bool FATData::readFromFile(string fName, unsigned int length, string* ret)
   for ( vector<SVMDirectoryEntry>::iterator entItr = rootEnts->begin() ;
         entItr != rootEnts->end() ; entItr++) 
   {
-    cout << "'" << (*entItr).DShortFileName << "' : '" << shortFName << "'\n";
+    // cout << "'" << (*entItr).DShortFileName << "' : '" << shortFName << "'\n";
     if ( shortFName == string((*entItr).DShortFileName) )
     {
       FATOffset = fileStarts->at(entItr - rootEnts->begin());
       dataOffset = FATOffset * clusterSize;
-      l = min((*entItr).DSize, length);
+      lenleft = min((*entItr).DSize * bytesPerSector * sectorsPerCluster, length);
       success = true;
       break;
     }
@@ -197,18 +196,17 @@ bool FATData::readFromFile(string fName, unsigned int length, string* ret)
   {
     return false;
   }
-  
+
   ifstream imageFile(imFileName, ios::in | ios::binary); // TODO: fstream method temporary. To be replaced by MachineFile function calls.
   // Note: Maybe make a wrapper function to make it easier?
   
   while (true)
   {
-    imageFile.seekg(dataStart + dataOffset);
+    imageFile.seekg((dataStart * bytesPerSector) + dataOffset);
     imageFile.read(curDataCluster, clusterSize);
-
-    if (l < clusterSize)
+    if (lenleft < clusterSize)
     {
-      retStr.append(curDataCluster, l);
+      retStr.append(curDataCluster, lenleft);
       break;
     }
     retStr.append(curDataCluster, clusterSize);
@@ -217,15 +215,16 @@ bool FATData::readFromFile(string fName, unsigned int length, string* ret)
     {
       return false;
     }
-    if (FAT[FATOffset] == FAT_CHAIN_END)
+
+    if (FAT[FATOffset] >= FAT_CHAIN_END)
     {
       break;
     }
-    
+
     // Calculate new FATPtr location, and new data offset
     dataOffset = (unsigned int)FAT[FATOffset] * clusterSize;
     FATOffset = (unsigned int)FAT[FATOffset];
-    l -= clusterSize;
+    lenleft -= clusterSize;
   }
   imageFile.close();
   delete [] curDataCluster;

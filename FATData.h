@@ -80,6 +80,7 @@ public:
   void fatvol();
   unsigned int getBytesPerSector();
   uint8_t* getROOT();
+  SVMDirectoryEntryRef getRootEnt(unsigned int pos);
   bool readFromFile(string fName, unsigned int length, string* ret);
   bool writeToFile(string fName, string newContents);
 };

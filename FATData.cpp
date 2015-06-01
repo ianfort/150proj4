@@ -164,6 +164,14 @@ uint8_t* FATData::getROOT()
 }//uint8_t* FATData::getROOT()
 
 
+SVMDirectoryEntryRef FATData::getRootEnt(unsigned int pos)
+{
+  if (pos >= rootEnts->size() || pos < 0)
+    return NULL;
+  return &(rootEnts->at(pos));
+}//SVMDirectoryEntryRef FATData::getRootEnt(int pos)
+
+
 bool FATData::readFromFile(string fName, unsigned int length, string* ret)
 {
   bool success = false;

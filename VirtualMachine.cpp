@@ -777,6 +777,11 @@ TVMStatus VMDirectoryRead(int dirdescriptor, SVMDirectoryEntryRef dirent)
     MachineResumeSignals(&sigs);
     return VM_STATUS_ERROR_INVALID_PARAMETER;
   }//if dirent is a NULL pointer
+  if (!dir)
+  {
+    MachineResumeSignals(&sigs);
+    return VM_STATUS_ERROR_INVALID_ID;
+  }//if dir not found
   tempdirent = VMFAT->getRootEnt(dir->getPos());
   if (!tempdirent)
   {
@@ -793,6 +798,8 @@ TVMStatus VMDirectoryRead(int dirdescriptor, SVMDirectoryEntryRef dirent)
 TVMStatus VMDirectoryRewind(int dirdescriptor)
 {
   MachineSuspendSignals(&sigs);
+  Dir *dir = findDir(dirdescriptor);
+  dir->rewind();
   MachineResumeSignals(&sigs);
   return VM_STATUS_SUCCESS;
 }//TVMStatus VMDirectoryRewind(int dirdescriptor)

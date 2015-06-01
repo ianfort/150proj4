@@ -3,6 +3,7 @@
 
 #include "VirtualMachine.h"
 #include "FATData.h"
+#include <iostream>
 
 #define DIR_ROOT_INDEX 0
 
@@ -19,9 +20,10 @@ public:
   Dir(const char *dirname, int *dirdescriptor, FATData* VMFAT);
   ~Dir();
   int getDirdesc();
-  int getPos();
-  void incPos();
   SVMDirectoryEntryRef getDirent();
+  unsigned int getPos();
+  void incPos();
+  void rewind();
 };
 
 void fillDate(SVMDateTimeRef dt, uint8_t date[2]);

@@ -26,7 +26,13 @@ int Dir::getDirdesc()
 }//int Dir::getDirdesc()
 
 
-int Dir::getPos()
+SVMDirectoryEntryRef Dir::getDirent()
+{
+  return dirent;
+}//SVMDirectoryEntryRef Dir::getDirent()
+
+
+unsigned int Dir::getPos()
 {
   return pos;
 }//int Dir::getPos()
@@ -38,10 +44,10 @@ void Dir::incPos()
 }//void Dir::incPos()
 
 
-SVMDirectoryEntryRef Dir::getDirent()
+void Dir::rewind()
 {
-  return dirent;
-}
+  pos = 0;
+}//void Dir::rewind()
 
 //***************************************************************************//
 // Begin Utility Functions for Dir                                           //

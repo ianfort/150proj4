@@ -6,6 +6,8 @@ using namespace std;
 
 int main()
 {
+  string myStr;
+  bool success;
   FATData* testFAT;
   testFAT = new FATData("fat.ima");
 
@@ -14,6 +16,12 @@ int main()
   cout << "Calling FATls\n";
   testFAT->fatls();
   cout << endl;
+
+  success = testFAT->readFromFile(string("MAKEFILE"), 1000, &myStr);
+
+  cout << "success: " << success << ". myStr: " << endl;
+  cout << myStr << endl;
+  
 /*
   cout << "Calling fatout\n";
   testFAT->fatout();

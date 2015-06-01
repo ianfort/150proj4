@@ -5,6 +5,8 @@
 #include <unistd.h>
 #include <string>
 #include <cstring>
+#include <algorithm>
+#include <cctype>
 
 
 FATData::FATData(const char* mount)
@@ -172,8 +174,8 @@ bool FATData::readFromFile(string fName, unsigned int length, string* ret)
   curDataCluster = new char[clusterSize];
   unsigned int curDataSize;
   string retStr;
-  unsigned int l = length;
-  string shortFName = convertFNameToShort(fName);
+  unsigned int l;
+  string shortFName = fName; //convertFNameToShort(fName);
 
   // Search vector of root entries for file with proper name, and get starting point.
   // Store it in FATPtr and dataOffset.
@@ -184,6 +186,7 @@ bool FATData::readFromFile(string fName, unsigned int length, string* ret)
     {
       FATOffset = fileStarts->at(entItr - rootEnts->begin());
       dataOffset = FATOffset * clusterSize;
+      l = min((*entItr).DSize, length);
       success = true;
       break;
     }
@@ -201,22 +204,19 @@ bool FATData::readFromFile(string fName, unsigned int length, string* ret)
   {
     imageFile.seekg(dataStart + dataOffset);
     imageFile.read(curDataCluster, clusterSize);
-    // TODO: Detect how much data is in cluster. Store in curDataSize
-    // curDataSize should equal clusterSize in all but the last cluster in the chain.
 
-    if (l < curDataSize)
+    if (l < clusterSize)
     {
       retStr.append(curDataCluster, l);
       break;
     }
-    retStr.append(curDataCluster, curDataSize);
-    
+    retStr.append(curDataCluster, clusterSize);
 
     if (!FAT[FATOffset])
     {
       return false;
     }
-    if (FAT[FATOffset] == 0xfff8)
+    if (FAT[FATOffset] == FAT_CHAIN_END)
     {
       break;
     }
@@ -302,5 +302,30 @@ unsigned int bytesToUnsigned(uint8_t* start, unsigned int size)
 
 string convertFNameToShort(string toConvert)
 {
-  return string("SAMPLE  TXT");
+  return string("HULLO   TXT");
+/*
+  string fName;
+  string fExtension;
+  unsigned int nameSize;
+  unsigned int extSize;
+  bool containsDot = false;
+
+  for ( unsigned int i = 0 ; i < toConvert.length() ; i++ )
+  {
+    if (toConvert[i] = '.')
+    {
+      containsDot = true;
+    }
+    else if (containsDot)
+    {
+      extSize++;
+    }
+    else
+    {
+      nameSize++;
+    }
+  }
+
+  if containsDot
+*/
 }

@@ -41,6 +41,7 @@
 #define ATTR_LONG_NAME (0x01 | 0x02 | 0x04 | 0x08)
 #define LO 0
 #define HI 1
+#define FAT_CHAIN_END 0xfff8
 
 #include <stdint.h>
 #include "VirtualMachine.h"

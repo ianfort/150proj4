@@ -17,7 +17,7 @@ int main()
   testFAT->fatls();
   cout << endl;
 
-  success = testFAT->readFromFile(string("MACHINE .CPP"), 1000, &myStr);
+  success = testFAT->readFromFile(string("MACHINE .CPP"), 1000000, &myStr);
 
   cout << "success: " << success << ". myStr: " << endl;
   cout << myStr << endl;

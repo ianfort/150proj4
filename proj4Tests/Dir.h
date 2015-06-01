@@ -13,8 +13,10 @@ class FATData;
 class Dir
 {
   SVMDirectoryEntryRef dirent;
+  int dirdesc;
 public:
   Dir(const char *dirname, int *dirdescriptor, FATData* VMFAT);
+  int getDirdesc();
 };
 
 void fillDate(SVMDateTimeRef dt, uint8_t date[2]);

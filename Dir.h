@@ -3,6 +3,7 @@
 
 #include "VirtualMachine.h"
 #include "FATData.h"
+#include <iostream>
 
 #define DIR_ROOT_INDEX 0
 
